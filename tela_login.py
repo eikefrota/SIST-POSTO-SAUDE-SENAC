@@ -8,9 +8,9 @@ class SistemaLogin:
         self.janela.title("Login")
         
         # Constantes
-        self.logo_path = "D:/Users/Aluno/Documents/SIS-POS-SAU/file.png"
-        self.user_icon_path = "D:/Users/Aluno/Documents/SIS-POS-SAU/user_login.png"
-        self.password_icon_path = "D:/Users/Aluno/Documents/SIS-POS-SAU/password_login.png"
+        self.logo_path = "imagens/logo.png"
+        self.user_icon_path = "imagens/password_login.png"
+        self.password_icon_path = "imagens/user_login.png"
 
         # Simulação de banco de dados de usuários
         self.usuarios = {
