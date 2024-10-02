@@ -1,14 +1,17 @@
 import customtkinter as ctk
-from tela_cadastro import SistemaCadastro
+from tela_cadastro import SistemaCadastro  # Importar a classe do outro arquivo
 
 def main():
+
     ctk.set_appearance_mode("light")
+    # Criar a janela principal
+    janela = ctk.CTk()
+    
+    # Instanciar o sistema de cadastro
+    app = SistemaCadastro(janela)
+    
+    # Iniciar o loop principal da interface
+    janela.mainloop()
 
-    janela = ctk.CTk()  # Criação da janela
-    app = SistemaCadastro(janela)  # Passa a janela para a classe SistemaCadastro
-    janela.mainloop()  # Inicia o loop da aplicação
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-        
