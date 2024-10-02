@@ -9,8 +9,8 @@ class SistemaLogin:
         
         # Constantes
         self.logo_path = "imagens/logo.png"
-        self.user_icon_path = "imagens/password_login.png"
-        self.password_icon_path = "imagens/user_login.png"
+        self.user_icon_path = "imagens/user_login.png"
+        self.password_icon_path = "imagens/password_login.png"
 
         # Simulação de banco de dados de usuários
         self.usuarios = {
