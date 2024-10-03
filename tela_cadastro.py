@@ -1,3 +1,5 @@
+from tkinter import messagebox
+from tkinter import ttk
 import customtkinter as ctk
 
 class SistemaCadastro:
@@ -42,7 +44,10 @@ class SistemaCadastro:
         self.entry_endereco = self.retornar_entry(11, "Digite o endereço")
         
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", command=self.cadastrar_paciente)
-        self.botao_cadastrar.grid(row=12, column=1,  padx=10, pady=20, sticky="w")
+        self.botao_cadastrar.grid(row=12, column=0, columnspan=2,  padx=10, pady=20)
+
+        self.btn_mostrar_tabela = ctk.CTkButton(self.frame, text="Mostrar tabela", command=self.exibir_tabela_pacientes)
+        self.btn_mostrar_tabela.grid(row=13, column=0, columnspan=2, padx=10, pady=20)
 
     def retornar_label(self, label_info, linha):
         return self.criar_label(label_info, linha)
@@ -69,12 +74,15 @@ class SistemaCadastro:
                 "email": email,
                 "endereco": endereco
             }
+            self.exibir_mensegebox()
 
             self.pacientes.append(paciente)
             print(f"Paciente cadastrado: {paciente}")
             self.limpar_campos()
         else:
             print("Erro: Entradas não inicializadas!")
+        
+
 
     def limpar_campos(self):
         self.entry_nome.delete(0, ctk.END)
@@ -88,10 +96,49 @@ class SistemaCadastro:
         label = ctk.CTkLabel(self.frame, text=texto, font=("Arial", 12, "bold"))
         label.grid(row=linha, column=1, padx=10, pady=(10, 0), sticky="w")
 
+    def exibir_mensegebox(self):
+       messagebox.showinfo("Sucesso", "Paciente cadastrado com sucesso!")  
+
     def criar_entry(self, linha, placeholder):
         entry = ctk.CTkEntry(self.frame, placeholder_text=placeholder, width=250, font=("Montserrat", 16))
         entry.grid(row=linha, column=1, padx=10, pady=(0, 20), sticky="w")
         return entry  # Certifique-se de retornar a entrada
+    
+    def exibir_tabela_pacientes(self):
+        # Limpar a tela para mostrar a tabela
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+            
+        # Criar a Tabela (Treeview)
+        self.tabela_frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="#FFFFFF")
+        self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.7, relheight=0.7)
+
+        self.tabela = ttk.Treeview(self.tabela_frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
+        
+        # Definir as colunas
+        self.tabela.heading("Nome", text="Nome")
+        self.tabela.heading("CPF", text="CPF")
+        self.tabela.heading("Data de Nascimento", text="Data de Nascimento")
+        self.tabela.heading("Telefone", text="Telefone")
+        self.tabela.heading("Email", text="Email")
+        self.tabela.heading("Endereço", text="Endereço")
+
+        self.tabela.column("Nome", width=150)
+        self.tabela.column("CPF", width=100)
+        self.tabela.column("Data de Nascimento", width=120)
+        self.tabela.column("Telefone", width=100)
+        self.tabela.column("Email", width=200)
+        self.tabela.column("Endereço", width=200)
+
+        self.tabela.pack(fill="both", expand=True)
+
+        # Inserir os pacientes cadastrados na tabela
+        for paciente in self.pacientes:
+            self.tabela.insert("", "end", values=(paciente["nome"], paciente["cpf"], paciente["data_nascimento"], paciente["telefone"], paciente["email"], paciente["endereco"]))
+        
+        # Botão para retornar à tela de cadastro
+        self.botao_voltar = ctk.CTkButton(self.tabela_frame, text="Voltar", command=self.criar_interface_cadastro)
+        self.botao_voltar.pack(pady=10)
 
 # Exemplo de execução
 if __name__ == "__main__":
