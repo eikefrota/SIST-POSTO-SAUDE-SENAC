@@ -14,10 +14,12 @@ class SistemaCadastro:
         
         self.pacientes = []
         
-        # Criar a interface uma vez
         self.criar_interface_cadastro()
         
     def criar_interface_cadastro(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+            
         # Frame centralizado
         self.frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
         self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.5, relheight=0.7)
@@ -95,25 +97,22 @@ class SistemaCadastro:
 
 
     def cadastrar_paciente(self):
-        # Verificar se as entradas estão inicializadas
-        if all([self.entry_nome, self.entry_cpf, self.entry_datanasc, 
-                self.entry_telefone, self.entry_email, self.entry_endereco]):
-            nome = self.entry_nome.get()
-            cpf = self.entry_cpf.get()
-            datanasc = self.entry_datanasc.get()
-            telefone = self.entry_telefone.get()
-            email = self.entry_email.get()
-            endereco = self.entry_endereco.get()
+        nome = self.entry_nome.get()
+        cpf = self.entry_cpf.get()
+        datanasc = self.entry_datanasc.get()
+        telefone = self.entry_telefone.get()
+        email = self.entry_email.get()
+        endereco = self.entry_endereco.get()
 
-            paciente = {
-                "nome": nome,
-                "cpf": cpf,
-                "data_nascimento": datanasc,
-                "telefone": telefone,
-                "email": email,
-                "endereco": endereco
-            }
-            self.exibir_mensegebox()
+        # Criar dicionário para o paciente
+        paciente = {
+            "nome": nome,
+            "cpf": cpf,
+            "data_nascimento": datanasc,
+            "telefone": telefone,
+            "email": email,
+            "endereco": endereco
+        }
 
         # Armazenar paciente na lista
         self.pacientes.append(paciente)
