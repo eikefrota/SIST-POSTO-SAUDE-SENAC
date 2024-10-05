@@ -9,7 +9,8 @@ class SistemaCadastro:
         self.janela = janela
         self.janela.title("Cadastro")
         self.janela.geometry(f"{self.janela.winfo_screenwidth()}x{self.janela.winfo_screenheight()}+0+0")
-        
+        self.janela.resizable(True, True)
+
         self.logo_path = "imagens/file.png"
         
         self.pacientes = []
@@ -22,7 +23,7 @@ class SistemaCadastro:
             
         # Frame centralizado
         self.frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
-        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.5, relheight=0.6)
+        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
 
         self.frame.grid_columnconfigure(0, weight=1)  # Coluna vazia à esquerda (expansível)
         self.frame.grid_columnconfigure(1, weight=0)  # Coluna das labels e entrys (não expansível)
@@ -162,11 +163,15 @@ class SistemaCadastro:
         self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="#FFFFFF")
         self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.8, relheight=0.8)
 
-        # Criar a tabela toda vez que o método for chamado
+        # Configurando o grid para redimensionar dinamicamente
+        self.tabela_frame.grid_columnconfigure(0, weight=1)  # Permitir que a tabela expanda
+        self.tabela_frame.grid_rowconfigure(0, weight=1)     # Permitir que a tabela expanda verticalmente
+
+        # Criar a tabela com grid, configurada para expandir conforme a janela é redimensionada
         self.tabela = ttk.Treeview(self.tabela_frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
         
         style = ttk.Style()
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold")) #nomes maiores e negrito
+        style.configure("Treeview.Heading", font=("Arial", 12, "bold")) # Nomes maiores e negrito
         
         # Definir as colunas
         self.tabela.heading("Nome", text="Nome")
@@ -181,18 +186,28 @@ class SistemaCadastro:
         self.tabela.column("CPF", anchor="center", width=150)
         self.tabela.column("Data de Nascimento", anchor="center", width=160)
         self.tabela.column("Telefone", anchor="center", width=150)
-        self.tabela.column("Email", anchor="center", width=300)
-        self.tabela.column("Endereço", anchor="center", width=350)
+        self.tabela.column("Email", anchor="center", width=250)
+        self.tabela.column("Endereço", anchor="center", width=300)
 
+        # Usar grid para a tabela, ocupando toda a área disponível
+        self.tabela.grid(row=0, column=0, sticky="nsew")  # Expande em todas as direções
+        
+        # Scrollbars para caso a tabela tenha muitos itens
+        scrollbar_y = ttk.Scrollbar(self.tabela_frame, orient="vertical", command=self.tabela.yview)
+        scrollbar_y.grid(row=0, column=1, sticky="ns")  # Posiciona a scrollbar no lado direito da tabela
+        
+        scrollbar_x = ttk.Scrollbar(self.tabela_frame, orient="horizontal", command=self.tabela.xview)
+        scrollbar_x.grid(row=1, column=0, sticky="ew")  # Posiciona a scrollbar abaixo da tabela
 
-        self.tabela.pack(fill="both", expand=True)
+        self.tabela.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
 
         # Sempre atualiza a tabela após a criação
         self.atualizar_tabela()
 
         # Botão para retornar à tela de cadastro
         self.botao_voltar = ctk.CTkButton(self.tabela_frame, text="Voltar", command=self.criar_interface_cadastro)
-        self.botao_voltar.pack(pady=10)
+        self.botao_voltar.grid(row=2, column=0, pady=10, sticky="ew")
+
 
 
     def atualizar_tabela(self):    # Inserir os pacientes cadastrados na tabela
