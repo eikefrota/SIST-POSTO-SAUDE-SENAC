@@ -55,22 +55,32 @@ class SistemaCadastro:
             return ctk.CTkImage(imagem, size=tamanho)
         return ImageTk.PhotoImage(imagem)
     
-    def criar_label(self, texto, linha, coluna):
-        label = ctk.CTkLabel(self.frame, text=texto, font=("Arial", 14, "bold"))
+    def criar_label(self, texto, linha, coluna, frame=None):
+        """Cria e retorna um label em um frame específico ou no frame principal se não especificado."""
+        if frame is None:
+            frame = self.frame  # Default para o frame principal
+        label = ctk.CTkLabel(frame, text=texto, font=("Arial", 14, "bold"))
         label.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 0), sticky="w")
         return label
 
-    def criar_entry(self, linha, coluna, placeholder):
-        """Cria um campo de entrada com ícone."""
-        entry = ctk.CTkEntry(self.frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
-        entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0,10), sticky="ns")
-        return entry 
+    def criar_entry(self, linha, coluna, placeholder, frame=None):
+        """Cria um campo de entrada com placeholder em um frame específico ou no frame principal se não especificado."""
+        if frame is None:
+            frame = self.frame  # Default para o frame principal
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
+        entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
+        return entry
+
     
-    def retornar_label(self, label_info, linha, coluna):
-        return self.criar_label(label_info, linha, coluna)
-    
-    def retornar_entry(self, linha, coluna, placeholder_inf):
-        return self.criar_entry(linha, coluna, placeholder_inf)
+    def retornar_label(self, label_info, linha, coluna, frame=None):
+        """Retorna um label criado em um frame específico ou no frame principal se não especificado."""
+        return self.criar_label(label_info, linha, coluna, frame)
+
+    def retornar_entry(self, linha, coluna, placeholder_inf, frame=None):
+        """Retorna um campo de entrada criado em um frame específico ou no frame principal se não especificado."""
+        return self.criar_entry(linha, coluna, placeholder_inf, frame)
+
+
 
     def criar_widgets_cadastro(self):
         # Logo centralizado
@@ -170,7 +180,7 @@ class SistemaCadastro:
             widget.destroy()
         
         # Criar a Tabela (Treeview)
-        self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="#FFFFFF")
+        self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="white")
         self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.8, relheight=0.8)
 
 
@@ -199,6 +209,9 @@ class SistemaCadastro:
         self.tabela.column("Telefone", anchor="center", width=150)
         self.tabela.column("Email", anchor="center", width=250)
         self.tabela.column("Endereço", anchor="center", width=300)
+
+        self.tabela.tag_configure('evenrow', background='#E8E8E8')  # Cor clara (linhas pares)
+        self.tabela.tag_configure('oddrow', background='#FFFFFF')
 
         # Adicionar botões de contexto para exclusão e alteração
         self.tabela.bind("<Button-3>", self.mostrar_menu_contexto)  # Clique com o botão direito para mostrar o menu
@@ -289,9 +302,6 @@ class SistemaCadastro:
         entry_endereco = self.criar_entry(6, 2, "Digite o endereço", frame_alteracao)
         entry_endereco.insert(0, paciente["endereco"])  # Insere o endereço atual do paciente
 
-
-
-
         # Botão de salvar as alterações
         botao_salvar = ctk.CTkButton(
             frame_alteracao, text="Salvar Alterações", 
@@ -308,22 +318,6 @@ class SistemaCadastro:
             )
         )
         botao_salvar.grid(row=7, column=1, columnspan=2, pady=20)
-
-    def criar_label(self, texto, linha, coluna, frame=None):
-        """Cria e retorna um label em um frame específico."""
-        if not frame:
-            frame = self.frame  # Default para o frame principal
-        label = ctk.CTkLabel(frame, text=texto, font=("Arial", 14, "bold"))
-        label.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 0), sticky="w")
-        return label
-
-    def criar_entry(self, linha, coluna, placeholder, frame=None):
-        """Cria um campo de entrada com placeholder em um frame específico."""
-        if not frame:
-            frame = self.frame  # Default para o frame principal
-        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
-        entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
-        return entry
 
     def salvar_alteracoes(self, paciente_idx, nome, cpf, datanasc, telefone, email, endereco, janela):
         """Salva as alterações feitas no paciente e atualiza a tabela."""
@@ -343,7 +337,16 @@ class SistemaCadastro:
         messagebox.showinfo("Alteração", "Paciente alterado com sucesso.")
 
 
-    def atualizar_tabela(self):    # Inserir os pacientes cadastrados na tabela
-        for paciente in self.pacientes:
-            self.tabela.insert("", "end", values=(paciente["nome"], paciente["cpf"], paciente["data_nascimento"], paciente["telefone"], paciente["email"], paciente["endereco"]))
+    def atualizar_tabela(self):
+        """Inserir os pacientes cadastrados na tabela, com cores alternadas."""
+    
+        # Limpar a tabela antes de inserir novos dados
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
+
+        # Inserir os pacientes cadastrados na tabela com cores alternadas
+        for i, paciente in enumerate(self.pacientes):
+            tag = 'evenrow' if i % 2 == 0 else 'oddrow'  # Define a tag com base no índice (par/ímpar)
+            self.tabela.insert("", "end", values=(paciente["nome"], paciente["cpf"], paciente["data_nascimento"], paciente["telefone"], paciente["email"], paciente["endereco"]), tags=(tag,))
+
         
