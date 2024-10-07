@@ -41,6 +41,7 @@ class SistemaCadastro:
         self.frame.grid_columnconfigure(2, weight=0)  # Coluna das labels e entrys (não expansível)
         self.frame.grid_columnconfigure(3, weight=1)  # Coluna vazia à direita (expansível)
         
+        
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         
         self.criar_widgets_cadastro()
@@ -67,9 +68,21 @@ class SistemaCadastro:
         """Cria um campo de entrada com placeholder em um frame específico ou no frame principal se não especificado."""
         if frame is None:
             frame = self.frame  # Default para o frame principal
-        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=40, font=("Montserrat", 16))
         entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
         return entry
+    
+    def criar_logo(self, frame=None):
+        self.label_logo = ctk.CTkLabel(frame, image=self.logo_image, text="")
+        if frame is None:
+            frame = self.frame  # Default para o frame principal
+        self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
+
+    def criar_titulo(self, frame=None, texto):
+        self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
+        if frame is None:
+            frame = self.frame  # Default para o frame principal
+        self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky="e")
 
     
     def retornar_label(self, label_info, linha, coluna, frame=None):
@@ -83,37 +96,46 @@ class SistemaCadastro:
 
 
     def criar_widgets_cadastro(self):
-        # Logo centralizado
+    
         self.label_logo = ctk.CTkLabel(self.frame, image=self.logo_image, text="")
-        self.label_logo.grid(row=0, column=1, columnspan=2, pady=(10, 5), sticky="n")
+        self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
+
+        self.label_titulo = ctk.CTkLabel(self.frame, text="Cadastro de Pacientes", font=("Montserrat", 20, "bold"))
+        self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky= "e")
+
+
+        # Configuração para centralização vertical
+        self.frame.grid_rowconfigure(0, weight=1)  # Espaço acima do formulário (logo)
+        self.frame.grid_rowconfigure(10, weight=2)  # Espaço abaixo do formulário
 
         # Primeiro conjunto: Nome e CPF
-        self.retornar_label("Nome:", 1, 1)  # Coluna 1 (centralizada)
-        self.entry_nome = self.retornar_entry(2, 1, "Digite o nome completo")  # Distância maior para o Nome
+        self.retornar_label("Nome:", 2, 1)  # Coluna 1 (centralizada)
+        self.entry_nome = self.retornar_entry(3, 1, "Digite o nome completo")  # Distância maior para o Nome
 
-        self.retornar_label("CPF:", 1, 2)  # Coluna 2
-        self.entry_cpf = self.retornar_entry(2, 2, "XXX.XXX.XXX-XX")
+        self.retornar_label("CPF:", 2, 2)  # Coluna 2
+        self.entry_cpf = self.retornar_entry(3, 2, "XXX.XXX.XXX-XX")
 
         # Segundo conjunto: Data de Nascimento e Telefone
-        self.retornar_label("Data de Nascimento:", 3, 1)  # Coluna 1
-        self.entry_datanasc = self.retornar_entry(4, 1, "DD/MM/AAAA")
+        self.retornar_label("Data de Nascimento:", 4, 1)  # Coluna 1
+        self.entry_datanasc = self.retornar_entry(5, 1, "DD/MM/AAAA")
 
-        self.retornar_label("Telefone:", 3, 2)  # Coluna 2
-        self.entry_telefone = self.retornar_entry(4, 2, "(DDD) 91234-5678")
+        self.retornar_label("Telefone:", 4, 2)  # Coluna 2
+        self.entry_telefone = self.retornar_entry(5, 2, "(DDD) 91234-5678")
 
         # Terceiro conjunto: Email e Endereço
-        self.retornar_label("Email:", 5, 1)
-        self.entry_email = self.retornar_entry(6, 1, "exemplo@dominio.com")
+        self.retornar_label("Email:", 6, 1)
+        self.entry_email = self.retornar_entry(7, 1, "exemplo@dominio.com")
 
-        self.retornar_label("Endereço:", 5, 2)
-        self.entry_endereco = self.retornar_entry(6, 2, "Digite o endereço")
+        self.retornar_label("Endereço:", 6, 2)
+        self.entry_endereco = self.retornar_entry(7, 2, "Digite o endereço")
 
         # Botões
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), command=self.cadastrar_paciente)
-        self.botao_cadastrar.grid(row=11, column=1, padx=(5, 5), pady=20, sticky="e")
+        self.botao_cadastrar.grid(row=9, column=1, padx=(5, 5), pady=20, sticky="e")
 
         self.btn_mostrar_tabela = ctk.CTkButton(self.frame, text="Mostrar tabela", font=("Arial", 14, "bold"), command=self.exibir_tabela_pacientes)
-        self.btn_mostrar_tabela.grid(row=11, column=2, padx=(5, 5), pady=20, sticky="w")   
+        self.btn_mostrar_tabela.grid(row=9, column=2, padx=(5, 5), pady=20, sticky="w")
+
 
 
     def cadastrar_paciente(self):
@@ -278,28 +300,31 @@ class SistemaCadastro:
         
         
         # Usar os mesmos métodos para criar os widgets de cadastro, mas com os valores pré-preenchidos
-        self.criar_label("Nome:", 1, 1, frame_alteracao)
-        entry_nome = self.criar_entry(2, 1, "Digite o nome completo", frame_alteracao)
+        self.criar_logo(frame_alteracao)
+        self.criar_titulo(frame_alteracao, "Atualização de Cadastro")
+        
+        self.criar_label("Nome:", 2, 1, frame_alteracao)
+        entry_nome = self.criar_entry(3, 1, "Digite o nome completo", frame_alteracao)
         entry_nome.insert(0, paciente["nome"])
         
-        self.criar_label("CPF:", 3, 1, frame_alteracao)
-        entry_cpf = self.criar_entry(4, 1, "XXX.XXX.XXX-XX", frame_alteracao)
+        self.criar_label("CPF:", 4, 1, frame_alteracao)
+        entry_cpf = self.criar_entry(5, 1, "XXX.XXX.XXX-XX", frame_alteracao)
         entry_cpf.insert(0, paciente["cpf"])
 
-        self.criar_label("Data de Nascimento:", 5, 1, frame_alteracao)
-        entry_datanasc = self.criar_entry(6, 1, "DD/MM/AAAA", frame_alteracao)
+        self.criar_label("Data de Nascimento:", 6, 1, frame_alteracao)
+        entry_datanasc = self.criar_entry(7, 1, "DD/MM/AAAA", frame_alteracao)
         entry_datanasc.insert(0, paciente["data_nascimento"])
 
-        self.criar_label("Telefone:", 1, 2, frame_alteracao)
-        entry_telefone = self.criar_entry(2, 2, "(DDD) 91234-5678", frame_alteracao)
+        self.criar_label("Telefone:", 2, 2, frame_alteracao)
+        entry_telefone = self.criar_entry(3, 2, "(DDD) 91234-5678", frame_alteracao)
         entry_telefone.insert(0, paciente["telefone"])
 
-        self.criar_label("Email:", 3, 2, frame_alteracao)
-        entry_email = self.criar_entry(4, 2, "email@exemplo.com", frame_alteracao)
+        self.criar_label("Email:", 4, 2, frame_alteracao)
+        entry_email = self.criar_entry(5, 2, "email@exemplo.com", frame_alteracao)
         entry_email.insert(0, paciente["email"])
 
-        self.criar_label("Endereço:", 5, 2, frame_alteracao)
-        entry_endereco = self.criar_entry(6, 2, "Digite o endereço", frame_alteracao)
+        self.criar_label("Endereço:", 6, 2, frame_alteracao)
+        entry_endereco = self.criar_entry(7, 2, "Digite o endereço", frame_alteracao)
         entry_endereco.insert(0, paciente["endereco"])  # Insere o endereço atual do paciente
 
         # Botão de salvar as alterações
@@ -317,7 +342,7 @@ class SistemaCadastro:
                 janela_alteracao
             )
         )
-        botao_salvar.grid(row=7, column=1, columnspan=2, pady=20)
+        botao_salvar.grid(row=8, column=1, columnspan=2, pady=20)
 
     def salvar_alteracoes(self, paciente_idx, nome, cpf, datanasc, telefone, email, endereco, janela):
         """Salva as alterações feitas no paciente e atualiza a tabela."""
