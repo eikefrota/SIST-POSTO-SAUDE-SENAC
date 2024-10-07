@@ -2,6 +2,8 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import customtkinter as ctk
 from tkinter import ttk
+from tkinter import Menu
+from tkinter import Toplevel
 
 class SistemaCadastro:
     
@@ -13,7 +15,16 @@ class SistemaCadastro:
 
         self.logo_path = "imagens/file.png"
         
-        self.pacientes = []
+        self.pacientes = [
+            {
+                "nome": "Teste Paciente",
+                "cpf": "12345678901",
+                "data_nascimento": "01/01/1980",
+                "telefone": "1234567890",
+                "email": "teste@dominio.com",
+                "endereco": "Rua de Teste, 123"
+            }
+        ]
         
         self.criar_interface_cadastro()
         
@@ -55,8 +66,8 @@ class SistemaCadastro:
         entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0,10), sticky="ns")
         return entry 
     
-    def retornar_label(self, label_info, linha):
-        return self.criar_label(label_info, linha)
+    def retornar_label(self, label_info, linha, coluna):
+        return self.criar_label(label_info, linha, coluna)
     
     def retornar_entry(self, linha, coluna, placeholder_inf):
         return self.criar_entry(linha, coluna, placeholder_inf)
@@ -67,25 +78,25 @@ class SistemaCadastro:
         self.label_logo.grid(row=0, column=1, columnspan=2, pady=(10, 5), sticky="n")
 
         # Primeiro conjunto: Nome e CPF
-        self.criar_label("Nome:", 1, 1)  # Coluna 1 (centralizada)
-        self.entry_nome = self.criar_entry(2, 1, "Digite o nome completo")  # Distância maior para o Nome
+        self.retornar_label("Nome:", 1, 1)  # Coluna 1 (centralizada)
+        self.entry_nome = self.retornar_entry(2, 1, "Digite o nome completo")  # Distância maior para o Nome
 
-        self.criar_label("CPF:", 1, 2)  # Coluna 2
-        self.entry_cpf = self.criar_entry(2, 2, "XXX.XXX.XXX-XX")
+        self.retornar_label("CPF:", 1, 2)  # Coluna 2
+        self.entry_cpf = self.retornar_entry(2, 2, "XXX.XXX.XXX-XX")
 
         # Segundo conjunto: Data de Nascimento e Telefone
-        self.criar_label("Data de Nascimento:", 3, 1)  # Coluna 1
-        self.entry_datanasc = self.criar_entry(4, 1, "DD/MM/AAAA")
+        self.retornar_label("Data de Nascimento:", 3, 1)  # Coluna 1
+        self.entry_datanasc = self.retornar_entry(4, 1, "DD/MM/AAAA")
 
-        self.criar_label("Telefone:", 3, 2)  # Coluna 2
-        self.entry_telefone = self.criar_entry(4, 2, "(DDD) 91234-5678")
+        self.retornar_label("Telefone:", 3, 2)  # Coluna 2
+        self.entry_telefone = self.retornar_entry(4, 2, "(DDD) 91234-5678")
 
         # Terceiro conjunto: Email e Endereço
-        self.criar_label("Email:", 5, 1)
-        self.entry_email = self.criar_entry(6, 1, "exemplo@dominio.com")
+        self.retornar_label("Email:", 5, 1)
+        self.entry_email = self.retornar_entry(6, 1, "exemplo@dominio.com")
 
-        self.criar_label("Endereço:", 5, 2)
-        self.entry_endereco = self.criar_entry(6, 2, "Digite o endereço")
+        self.retornar_label("Endereço:", 5, 2)
+        self.entry_endereco = self.retornar_entry(6, 2, "Digite o endereço")
 
         # Botões
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), command=self.cadastrar_paciente)
@@ -93,7 +104,6 @@ class SistemaCadastro:
 
         self.btn_mostrar_tabela = ctk.CTkButton(self.frame, text="Mostrar tabela", font=("Arial", 14, "bold"), command=self.exibir_tabela_pacientes)
         self.btn_mostrar_tabela.grid(row=11, column=2, padx=(5, 5), pady=20, sticky="w")   
-
 
 
     def cadastrar_paciente(self):
@@ -163,6 +173,7 @@ class SistemaCadastro:
         self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="#FFFFFF")
         self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.8, relheight=0.8)
 
+
         # Configurando o grid para redimensionar dinamicamente
         self.tabela_frame.grid_columnconfigure(0, weight=1)  # Permitir que a tabela expanda
         self.tabela_frame.grid_rowconfigure(0, weight=1)     # Permitir que a tabela expanda verticalmente
@@ -171,7 +182,7 @@ class SistemaCadastro:
         self.tabela = ttk.Treeview(self.tabela_frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
         
         style = ttk.Style()
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold")) # Nomes maiores e negrito
+        style.configure("Treeview.Heading", font=("Arial", 14, "bold")) # Nomes maiores e negrito
         
         # Definir as colunas
         self.tabela.heading("Nome", text="Nome")
@@ -188,6 +199,9 @@ class SistemaCadastro:
         self.tabela.column("Telefone", anchor="center", width=150)
         self.tabela.column("Email", anchor="center", width=250)
         self.tabela.column("Endereço", anchor="center", width=300)
+
+        # Adicionar botões de contexto para exclusão e alteração
+        self.tabela.bind("<Button-3>", self.mostrar_menu_contexto)  # Clique com o botão direito para mostrar o menu
 
         # Usar grid para a tabela, ocupando toda a área disponível
         self.tabela.grid(row=0, column=0, sticky="nsew")  # Expande em todas as direções
@@ -206,8 +220,127 @@ class SistemaCadastro:
 
         # Botão para retornar à tela de cadastro
         self.botao_voltar = ctk.CTkButton(self.tabela_frame, text="Voltar", command=self.criar_interface_cadastro)
-        self.botao_voltar.grid(row=2, column=0, pady=10, sticky="ew")
+        self.botao_voltar.grid(row=2, column=0, columnspan=2, pady=10)
+    
+    def mostrar_menu_contexto(self, event):
+        """Exibe um menu de contexto na linha selecionada."""
+        item = self.tabela.identify_row(event.y)
+        if item:
+            menu = Menu(self.janela, tearoff=0)
+            menu.add_command(label="Alterar", command=lambda: self.alterar_paciente(item))
+            menu.add_command(label="Excluir", command=lambda: self.excluir_paciente(item))
+            menu.post(event.x_root, event.y_root)
 
+    def excluir_paciente(self, item):
+        """Remove o paciente da lista e atualiza a tabela."""
+        paciente_idx = self.tabela.index(item)
+        self.pacientes.pop(paciente_idx)
+        self.atualizar_tabela()
+        messagebox.showinfo("Exclusão", "Paciente excluído com sucesso.")
+
+    def alterar_paciente(self, item):
+        """Abre uma janela para alteração dos dados do paciente com a interface replicada."""
+        paciente_idx = self.tabela.index(item)
+        paciente = self.pacientes[paciente_idx]
+
+        # Criar uma nova janela para alteração, semelhante à interface de cadastro
+        janela_alteracao = ctk.CTkToplevel()
+        janela_alteracao.title("Alterar Paciente")
+        janela_alteracao.geometry(f"{janela_alteracao.winfo_screenwidth()}x{janela_alteracao.winfo_screenheight()}+0+0")  # Definir tamanho personalizado se necessário
+        janela_alteracao.resizable(True, True)
+
+        janela_alteracao.grab_set()  # Para manter o foco nesta janela
+
+        frame_alteracao = ctk.CTkFrame(janela_alteracao, border_width=3, border_color="#00CED1", fg_color="white")
+        frame_alteracao.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
+        
+        
+        frame_alteracao.grid_columnconfigure(0, weight=1)  # Coluna vazia à esquerda
+        frame_alteracao.grid_columnconfigure(1, weight=0)  # Coluna das labels (não expansível)
+        frame_alteracao.grid_columnconfigure(2, weight=0)  # Coluna dos entry (não expansível)
+        frame_alteracao.grid_columnconfigure(3, weight=1)
+
+        frame_alteracao.grid_rowconfigure(0, weight=1)  # Espaço vazio acima dos widgets
+        frame_alteracao.grid_rowconfigure(8, weight=1)  # Espaço vazio abaixo dos widgets
+        
+        
+        # Usar os mesmos métodos para criar os widgets de cadastro, mas com os valores pré-preenchidos
+        self.criar_label("Nome:", 1, 1, frame_alteracao)
+        entry_nome = self.criar_entry(2, 1, "Digite o nome completo", frame_alteracao)
+        entry_nome.insert(0, paciente["nome"])
+        
+        self.criar_label("CPF:", 3, 1, frame_alteracao)
+        entry_cpf = self.criar_entry(4, 1, "XXX.XXX.XXX-XX", frame_alteracao)
+        entry_cpf.insert(0, paciente["cpf"])
+
+        self.criar_label("Data de Nascimento:", 5, 1, frame_alteracao)
+        entry_datanasc = self.criar_entry(6, 1, "DD/MM/AAAA", frame_alteracao)
+        entry_datanasc.insert(0, paciente["data_nascimento"])
+
+        self.criar_label("Telefone:", 1, 2, frame_alteracao)
+        entry_telefone = self.criar_entry(2, 2, "(DDD) 91234-5678", frame_alteracao)
+        entry_telefone.insert(0, paciente["telefone"])
+
+        self.criar_label("Email:", 3, 2, frame_alteracao)
+        entry_email = self.criar_entry(4, 2, "email@exemplo.com", frame_alteracao)
+        entry_email.insert(0, paciente["email"])
+
+        self.criar_label("Endereço:", 5, 2, frame_alteracao)
+        entry_endereco = self.criar_entry(6, 2, "Digite o endereço", frame_alteracao)
+        entry_endereco.insert(0, paciente["endereco"])  # Insere o endereço atual do paciente
+
+
+
+
+        # Botão de salvar as alterações
+        botao_salvar = ctk.CTkButton(
+            frame_alteracao, text="Salvar Alterações", 
+            font=("Arial", 14, "bold"), 
+            command=lambda: self.salvar_alteracoes(
+                paciente_idx, 
+                entry_nome.get(), 
+                entry_cpf.get(), 
+                entry_datanasc.get(), 
+                entry_telefone.get(), 
+                entry_email.get(), 
+                entry_endereco.get(), 
+                janela_alteracao
+            )
+        )
+        botao_salvar.grid(row=7, column=1, columnspan=2, pady=20)
+
+    def criar_label(self, texto, linha, coluna, frame=None):
+        """Cria e retorna um label em um frame específico."""
+        if not frame:
+            frame = self.frame  # Default para o frame principal
+        label = ctk.CTkLabel(frame, text=texto, font=("Arial", 14, "bold"))
+        label.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 0), sticky="w")
+        return label
+
+    def criar_entry(self, linha, coluna, placeholder, frame=None):
+        """Cria um campo de entrada com placeholder em um frame específico."""
+        if not frame:
+            frame = self.frame  # Default para o frame principal
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
+        entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
+        return entry
+
+    def salvar_alteracoes(self, paciente_idx, nome, cpf, datanasc, telefone, email, endereco, janela):
+        """Salva as alterações feitas no paciente e atualiza a tabela."""
+        # Atualizar os dados do paciente
+        self.pacientes[paciente_idx] = {
+            "nome": nome,
+            "cpf": cpf,
+            "data_nascimento": datanasc,
+            "telefone": telefone,
+            "email": email,
+            "endereco": endereco
+        }
+
+        # Atualizar a tabela com as novas informações
+        self.atualizar_tabela()
+        janela.destroy()
+        messagebox.showinfo("Alteração", "Paciente alterado com sucesso.")
 
 
     def atualizar_tabela(self):    # Inserir os pacientes cadastrados na tabela
