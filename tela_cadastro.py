@@ -68,20 +68,20 @@ class SistemaCadastro:
         """Cria um campo de entrada com placeholder em um frame específico ou no frame principal se não especificado."""
         if frame is None:
             frame = self.frame  # Default para o frame principal
-        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=40, font=("Montserrat", 16))
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
         entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
         return entry
     
     def criar_logo(self, frame=None):
-        self.label_logo = ctk.CTkLabel(frame, image=self.logo_image, text="")
         if frame is None:
             frame = self.frame  # Default para o frame principal
+        self.label_logo = ctk.CTkLabel(frame, image=self.logo_image, text="")
         self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
 
-    def criar_titulo(self, frame=None, texto):
-        self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
+    def criar_titulo(self, texto, frame=None):
         if frame is None:
             frame = self.frame  # Default para o frame principal
+        self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
         self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky="e")
 
     
@@ -295,13 +295,10 @@ class SistemaCadastro:
         frame_alteracao.grid_columnconfigure(2, weight=0)  # Coluna dos entry (não expansível)
         frame_alteracao.grid_columnconfigure(3, weight=1)
 
-        frame_alteracao.grid_rowconfigure(0, weight=1)  # Espaço vazio acima dos widgets
-        frame_alteracao.grid_rowconfigure(8, weight=1)  # Espaço vazio abaixo dos widgets
-        
         
         # Usar os mesmos métodos para criar os widgets de cadastro, mas com os valores pré-preenchidos
         self.criar_logo(frame_alteracao)
-        self.criar_titulo(frame_alteracao, "Atualização de Cadastro")
+        self.criar_titulo("Atualização de Cadastro", frame_alteracao)
         
         self.criar_label("Nome:", 2, 1, frame_alteracao)
         entry_nome = self.criar_entry(3, 1, "Digite o nome completo", frame_alteracao)
