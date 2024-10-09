@@ -65,7 +65,6 @@ class SistemaCadastro:
         self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
         self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky="e")
 
-
     def retornar_logo(self, frame=None):
         return self.criar_logo(frame)
     
@@ -80,8 +79,7 @@ class SistemaCadastro:
         """Retorna um campo de entrada criado em um frame específico ou no frame principal se não especificado."""
         return self.criar_entry(linha, coluna, placeholder_inf, frame)
 
-
-
+    #--------------------------------MODELO FORMULARIO--------------------------------------------------------------
     def criar_widgets_formulario(self, frame, valores=None):
         """Cria os widgets do formulário no frame especificado.
         
@@ -277,11 +275,22 @@ class SistemaCadastro:
             menu.post(event.x_root, event.y_root)
 
     def excluir_paciente(self, item):
-        """Remove o paciente da lista e atualiza a tabela."""
+        """Remove o paciente da lista após confirmação e atualiza a tabela."""
         paciente_idx = self.tabela.index(item)
-        self.pacientes.pop(paciente_idx)
-        self.atualizar_tabela()
-        messagebox.showinfo("Exclusão", "Paciente excluído com sucesso.")
+        paciente = self.pacientes[paciente_idx]
+
+        # Caixa de diálogo para confirmar a exclusão
+        confirmacao = messagebox.askyesno(
+            "Confirmar Exclusão", 
+            f"Tem certeza que deseja excluir o paciente '{paciente['nome']}' do sistema?"
+        )
+
+        if confirmacao:
+            self.pacientes.pop(paciente_idx)
+            self.atualizar_tabela()
+            messagebox.showinfo("Exclusão", "Paciente excluído com sucesso.")
+        else:
+            messagebox.showinfo("Cancelado", "A exclusão foi cancelada.")
 
     def alterar_paciente(self, item):
         """Abre uma janela para alteração dos dados do paciente com a interface replicada."""
