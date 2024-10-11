@@ -46,7 +46,7 @@ class MedicoView:
 
     def mostrar_tabela_consultas(self, consultas):
         # Limpar a tela para mostrar a tabela
-        for widget in self.janela.winfo_children():
+        for widget in self.janela.winfo_children(consultas):
             widget.pack_forget()
 
         # Criar a Tabela (Treeview)
