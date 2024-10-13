@@ -58,6 +58,8 @@ class SistemaCadastro:
             frame = self.frame  # Default para o frame principal
         self.label_logo = ctk.CTkLabel(frame, image=self.logo_image, text="")
         self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
+        
+        
 
     def criar_titulo(self, texto, frame=None):
         if frame is None:
