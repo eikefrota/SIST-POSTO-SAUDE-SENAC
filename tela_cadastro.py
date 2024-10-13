@@ -14,6 +14,7 @@ class SistemaCadastro:
         self.janela.resizable(True, True)
 
         self.logo_path = "imagens/file.png"
+        self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         
         self.pacientes = [
             {
@@ -27,26 +28,6 @@ class SistemaCadastro:
         ]
         
         self.criar_interface_cadastro()
-        
-    def criar_interface_cadastro(self):
-        for widget in self.janela.winfo_children():
-            widget.destroy()
-            
-        # Frame centralizado
-        self.frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
-        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
-
-        self.frame.grid_columnconfigure(0, weight=1)  # Coluna vazia à esquerda (expansível)
-        self.frame.grid_columnconfigure(1, weight=0)  # Coluna das labels e entrys (não expansível)
-        self.frame.grid_columnconfigure(2, weight=0)  # Coluna das labels e entrys (não expansível)
-        self.frame.grid_columnconfigure(3, weight=1)  # Coluna vazia à direita (expansível)
-        
-        
-        self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
-        
-        self.criar_widgets_cadastro()
-        
-        self.tabela = ttk.Treeview(self.frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
     
     def carregar_imagem(self, caminho, tamanho, ctk_image=True):
         """Carrega e redimensiona uma imagem."""
@@ -68,23 +49,30 @@ class SistemaCadastro:
         """Cria um campo de entrada com placeholder em um frame específico ou no frame principal se não especificado."""
         if frame is None:
             frame = self.frame  # Default para o frame principal
-        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=40, font=("Montserrat", 16))
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder, width=300, height=30, font=("Montserrat", 16))
         entry.grid(row=linha, column=coluna, padx=(30, 30), pady=(0, 10), sticky="ns")
         return entry
     
     def criar_logo(self, frame=None):
+        if frame is None:
+            frame = self.frame  # Default para o frame principal
         self.label_logo = ctk.CTkLabel(frame, image=self.logo_image, text="")
-        if frame is None:
-            frame = self.frame  # Default para o frame principal
         self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
+        
+        
 
-    def criar_titulo(self, frame=None, texto):
-        self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
+    def criar_titulo(self, texto, frame=None):
         if frame is None:
             frame = self.frame  # Default para o frame principal
+        self.label_titulo = ctk.CTkLabel(frame, text=texto, font=("Montserrat", 20, "bold"))
         self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky="e")
 
+    def retornar_logo(self, frame=None):
+        return self.criar_logo(frame)
     
+    def retornar_titulo(self, info_titulo, frame=None):
+        return self.criar_titulo(info_titulo, frame)
+
     def retornar_label(self, label_info, linha, coluna, frame=None):
         """Retorna um label criado em um frame específico ou no frame principal se não especificado."""
         return self.criar_label(label_info, linha, coluna, frame)
@@ -93,41 +81,64 @@ class SistemaCadastro:
         """Retorna um campo de entrada criado em um frame específico ou no frame principal se não especificado."""
         return self.criar_entry(linha, coluna, placeholder_inf, frame)
 
+    #--------------------------------MODELO FORMULARIO--------------------------------------------------------------
+    def criar_widgets_formulario(self, frame, valores=None):
+        """Cria os widgets do formulário no frame especificado.
+        
+        Args:
+            frame: Frame onde os widgets serão criados.
+            valores: Dicionário com os valores iniciais para preenchimento dos campos.
+        """
+        self.retornar_logo(frame)
+        self.retornar_titulo("Cadastro de Paciente" if not valores else "Atualização de Cadastro", frame)
 
+        frame.grid_rowconfigure(0, weight=1)
+        frame.grid_rowconfigure(10, weight=2)
 
-    def criar_widgets_cadastro(self):
+        # Nome e CPF
+        self.retornar_label("Nome:", 2, 1, frame)
+        entry_nome = self.retornar_entry(3, 1, "Digite o nome completo", frame)
+        if valores: entry_nome.insert(0, valores.get("nome", ""))
+
+        self.retornar_label("CPF:", 2, 2, frame)
+        entry_cpf = self.retornar_entry(3, 2, "XXX.XXX.XXX-XX", frame)
+        if valores: entry_cpf.insert(0, valores.get("cpf", ""))
+
+        # Data de Nascimento e Telefone
+        self.retornar_label("Data de Nascimento:", 4, 1, frame)
+        entry_datanasc = self.retornar_entry(5, 1, "DD/MM/AAAA", frame)
+        if valores: entry_datanasc.insert(0, valores.get("data_nascimento", ""))
+
+        self.retornar_label("Telefone:", 4, 2, frame)
+        entry_telefone = self.retornar_entry(5, 2, "(DDD) 91234-5678", frame)
+        if valores: entry_telefone.insert(0, valores.get("telefone", ""))
+
+        # Email e Endereço
+        self.retornar_label("Email:", 6, 1, frame)
+        entry_email = self.retornar_entry(7, 1, "exemplo@dominio.com", frame)
+        if valores: entry_email.insert(0, valores.get("email", ""))
+
+        self.retornar_label("Endereço:", 6, 2, frame)
+        entry_endereco = self.retornar_entry(7, 2, "Digite o endereço", frame)
+        if valores: entry_endereco.insert(0, valores.get("endereco", ""))
+
+        return entry_nome, entry_cpf, entry_datanasc, entry_telefone, entry_email, entry_endereco
     
-        self.label_logo = ctk.CTkLabel(self.frame, image=self.logo_image, text="")
-        self.label_logo.grid(row=1, column=1, padx=(0, 20), pady=(10, 5), sticky="w")
+    def criar_interface_cadastro(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
 
-        self.label_titulo = ctk.CTkLabel(self.frame, text="Cadastro de Pacientes", font=("Montserrat", 20, "bold"))
-        self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky= "e")
+        # Frame centralizado
+        self.frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
+        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
 
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(1, weight=0)
+        self.frame.grid_columnconfigure(2, weight=0)
+        self.frame.grid_columnconfigure(3, weight=1)
 
-        # Configuração para centralização vertical
-        self.frame.grid_rowconfigure(0, weight=1)  # Espaço acima do formulário (logo)
-        self.frame.grid_rowconfigure(10, weight=2)  # Espaço abaixo do formulário
-
-        # Primeiro conjunto: Nome e CPF
-        self.retornar_label("Nome:", 2, 1)  # Coluna 1 (centralizada)
-        self.entry_nome = self.retornar_entry(3, 1, "Digite o nome completo")  # Distância maior para o Nome
-
-        self.retornar_label("CPF:", 2, 2)  # Coluna 2
-        self.entry_cpf = self.retornar_entry(3, 2, "XXX.XXX.XXX-XX")
-
-        # Segundo conjunto: Data de Nascimento e Telefone
-        self.retornar_label("Data de Nascimento:", 4, 1)  # Coluna 1
-        self.entry_datanasc = self.retornar_entry(5, 1, "DD/MM/AAAA")
-
-        self.retornar_label("Telefone:", 4, 2)  # Coluna 2
-        self.entry_telefone = self.retornar_entry(5, 2, "(DDD) 91234-5678")
-
-        # Terceiro conjunto: Email e Endereço
-        self.retornar_label("Email:", 6, 1)
-        self.entry_email = self.retornar_entry(7, 1, "exemplo@dominio.com")
-
-        self.retornar_label("Endereço:", 6, 2)
-        self.entry_endereco = self.retornar_entry(7, 2, "Digite o endereço")
+        # Criar widgets de cadastro
+        self.entry_nome, self.entry_cpf, self.entry_datanasc, self.entry_telefone, self.entry_email, self.entry_endereco = self.criar_widgets_formulario(self.frame)
 
         # Botões
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), command=self.cadastrar_paciente)
@@ -135,7 +146,6 @@ class SistemaCadastro:
 
         self.btn_mostrar_tabela = ctk.CTkButton(self.frame, text="Mostrar tabela", font=("Arial", 14, "bold"), command=self.exibir_tabela_pacientes)
         self.btn_mostrar_tabela.grid(row=9, column=2, padx=(5, 5), pady=20, sticky="w")
-
 
 
     def cadastrar_paciente(self):
@@ -267,11 +277,22 @@ class SistemaCadastro:
             menu.post(event.x_root, event.y_root)
 
     def excluir_paciente(self, item):
-        """Remove o paciente da lista e atualiza a tabela."""
+        """Remove o paciente da lista após confirmação e atualiza a tabela."""
         paciente_idx = self.tabela.index(item)
-        self.pacientes.pop(paciente_idx)
-        self.atualizar_tabela()
-        messagebox.showinfo("Exclusão", "Paciente excluído com sucesso.")
+        paciente = self.pacientes[paciente_idx]
+
+        # Caixa de diálogo para confirmar a exclusão
+        confirmacao = messagebox.askyesno(
+            "Confirmar Exclusão", 
+            f"Tem certeza que deseja excluir o paciente '{paciente['nome']}' do sistema?"
+        )
+
+        if confirmacao:
+            self.pacientes.pop(paciente_idx)
+            self.atualizar_tabela()
+            messagebox.showinfo("Exclusão", "Paciente excluído com sucesso.")
+        else:
+            messagebox.showinfo("Cancelado", "A exclusão foi cancelada.")
 
     def alterar_paciente(self, item):
         """Abre uma janela para alteração dos dados do paciente com a interface replicada."""
@@ -281,51 +302,20 @@ class SistemaCadastro:
         # Criar uma nova janela para alteração, semelhante à interface de cadastro
         janela_alteracao = ctk.CTkToplevel()
         janela_alteracao.title("Alterar Paciente")
-        janela_alteracao.geometry(f"{janela_alteracao.winfo_screenwidth()}x{janela_alteracao.winfo_screenheight()}+0+0")  # Definir tamanho personalizado se necessário
+        janela_alteracao.geometry(f"{janela_alteracao.winfo_screenwidth()}x{janela_alteracao.winfo_screenheight()}+0+0")
         janela_alteracao.resizable(True, True)
-
-        janela_alteracao.grab_set()  # Para manter o foco nesta janela
+        janela_alteracao.grab_set()
 
         frame_alteracao = ctk.CTkFrame(janela_alteracao, border_width=3, border_color="#00CED1", fg_color="white")
         frame_alteracao.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
-        
-        
-        frame_alteracao.grid_columnconfigure(0, weight=1)  # Coluna vazia à esquerda
-        frame_alteracao.grid_columnconfigure(1, weight=0)  # Coluna das labels (não expansível)
-        frame_alteracao.grid_columnconfigure(2, weight=0)  # Coluna dos entry (não expansível)
+
+        frame_alteracao.grid_columnconfigure(0, weight=1)
+        frame_alteracao.grid_columnconfigure(1, weight=0)
+        frame_alteracao.grid_columnconfigure(2, weight=0)
         frame_alteracao.grid_columnconfigure(3, weight=1)
 
-        frame_alteracao.grid_rowconfigure(0, weight=1)  # Espaço vazio acima dos widgets
-        frame_alteracao.grid_rowconfigure(8, weight=1)  # Espaço vazio abaixo dos widgets
-        
-        
-        # Usar os mesmos métodos para criar os widgets de cadastro, mas com os valores pré-preenchidos
-        self.criar_logo(frame_alteracao)
-        self.criar_titulo(frame_alteracao, "Atualização de Cadastro")
-        
-        self.criar_label("Nome:", 2, 1, frame_alteracao)
-        entry_nome = self.criar_entry(3, 1, "Digite o nome completo", frame_alteracao)
-        entry_nome.insert(0, paciente["nome"])
-        
-        self.criar_label("CPF:", 4, 1, frame_alteracao)
-        entry_cpf = self.criar_entry(5, 1, "XXX.XXX.XXX-XX", frame_alteracao)
-        entry_cpf.insert(0, paciente["cpf"])
-
-        self.criar_label("Data de Nascimento:", 6, 1, frame_alteracao)
-        entry_datanasc = self.criar_entry(7, 1, "DD/MM/AAAA", frame_alteracao)
-        entry_datanasc.insert(0, paciente["data_nascimento"])
-
-        self.criar_label("Telefone:", 2, 2, frame_alteracao)
-        entry_telefone = self.criar_entry(3, 2, "(DDD) 91234-5678", frame_alteracao)
-        entry_telefone.insert(0, paciente["telefone"])
-
-        self.criar_label("Email:", 4, 2, frame_alteracao)
-        entry_email = self.criar_entry(5, 2, "email@exemplo.com", frame_alteracao)
-        entry_email.insert(0, paciente["email"])
-
-        self.criar_label("Endereço:", 6, 2, frame_alteracao)
-        entry_endereco = self.criar_entry(7, 2, "Digite o endereço", frame_alteracao)
-        entry_endereco.insert(0, paciente["endereco"])  # Insere o endereço atual do paciente
+        # Criar widgets de alteração com valores preenchidos
+        entry_nome, entry_cpf, entry_datanasc, entry_telefone, entry_email, entry_endereco = self.criar_widgets_formulario(frame_alteracao, paciente)
 
         # Botão de salvar as alterações
         botao_salvar = ctk.CTkButton(
@@ -342,7 +332,14 @@ class SistemaCadastro:
                 janela_alteracao
             )
         )
-        botao_salvar.grid(row=8, column=1, columnspan=2, pady=20)
+        botao_salvar.grid(row=9, column=1, pady=20, padx=10, sticky="e")
+
+        botao_descartar = ctk.CTkButton(
+        frame_alteracao, text="Descartar Alterações", 
+        font=("Arial", 14, "bold"), 
+        command=lambda: self.descartar_alteracoes(janela_alteracao)
+    )
+        botao_descartar.grid(row=9, column=2, pady=20, padx=10, sticky="w")
 
     def salvar_alteracoes(self, paciente_idx, nome, cpf, datanasc, telefone, email, endereco, janela):
         """Salva as alterações feitas no paciente e atualiza a tabela."""
@@ -360,6 +357,11 @@ class SistemaCadastro:
         self.atualizar_tabela()
         janela.destroy()
         messagebox.showinfo("Alteração", "Paciente alterado com sucesso.")
+
+    def descartar_alteracoes(self, janela):
+        """Descarta as alterações e fecha a janela de alteração."""
+        janela.destroy()
+        messagebox.showinfo("Alteração Descartada", "As alterações foram descartadas com sucesso.")
 
 
     def atualizar_tabela(self):
