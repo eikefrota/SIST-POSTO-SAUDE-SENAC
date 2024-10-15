@@ -1,3 +1,4 @@
+import os
 import customtkinter as ctk
 from tkinter import ttk, messagebox, Menu
 from PIL import Image, ImageTk
@@ -7,7 +8,7 @@ class SistemaCadastroView:
         self.janela = janela
         self.controller = controller
         self.configurar_janela()
-        self.logo_path = "imagens/file.png"
+        self.logo_path = os.path.abspath("C:/Users/Clean Vision/OneDrive/Área de Trabalho/logo/logo.png")
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         self.exibir_tela_recepcionista()
 
@@ -16,13 +17,11 @@ class SistemaCadastroView:
         self.janela.geometry(f"{self.janela.winfo_screenwidth()}x{self.janela.winfo_screenheight()}+0+0")
         self.janela.resizable(True, True)
 
-    def carregar_imagem(self, caminho, tamanho, ctk_image=True):
-        """Carrega e redimensiona uma imagem."""
+    def carregar_imagem(self, caminho, tamanho):
+        """Carrega e redimensiona uma imagem usando apenas CTkImage."""
         imagem = Image.open(caminho)
         imagem = imagem.resize(tamanho, Image.LANCZOS)
-        if ctk_image:
-            return ctk.CTkImage(imagem, size=tamanho)
-        return ImageTk.PhotoImage(imagem)
+        return ctk.CTkImage(light_image=imagem, dark_image=imagem, size=tamanho)
 
     def criar_label(self, texto, linha, coluna, frame=None):
         """Cria e retorna um label em um frame específico ou no frame principal se não especificado."""
@@ -88,6 +87,9 @@ class SistemaCadastroView:
         self.frame.grid_columnconfigure((0, 3), weight=1)
         self.frame.grid_columnconfigure((1, 2), weight=0)
 
+        # Recarregar a imagem da logo antes de criar os widgets
+        self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
+
         self.criar_widgets_formulario()
 
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), width=200, height=30, command=self.enviar_cadastro)
@@ -109,13 +111,16 @@ class SistemaCadastroView:
         
         self.criar_label("CPF:", 2, 2)
         self.entry_cpf = self.criar_entry(3, 2, "XXX.XXX.XXX-XX")
+        self.entry_cpf.bind("<KeyRelease>", self.formatar_cpf)
         
         self.criar_label("Data de Nascimento:", 4, 1)
         self.entry_datanasc = self.criar_entry(5, 1, "DD/MM/AAAA")
+        self.entry_datanasc.bind("<KeyRelease>", self.formatar_data_nascimento)
 
         # Telefone, Email e Endereço (sempre editáveis)
         self.criar_label("Telefone:", 4, 2)
         self.entry_telefone = self.criar_entry(5, 2, "(DDD) 91234-5678")
+        self.entry_telefone.bind("<KeyRelease>", self.formatar_telefone)
 
         self.criar_label("Email:", 6, 1)
         self.entry_email = self.criar_entry(7, 1, "exemplo@dominio.com")
@@ -130,6 +135,48 @@ class SistemaCadastroView:
             self.entry_nome.configure(state="readonly")
             self.entry_cpf.configure(state="readonly")
             self.entry_datanasc.configure(state="readonly")
+
+    def formatar_cpf(self, event):
+        cpf = self.entry_cpf.get()
+        cpf = ''.join(filter(str.isdigit, cpf))
+        cpf = cpf[:11]  # Limita a 11 dígitos
+        
+        cpf_formatado = ''
+        for i, digit in enumerate(cpf):
+            if i == 3 or i == 6:
+                cpf_formatado += '.'
+            elif i == 9:
+                cpf_formatado += '-'
+            cpf_formatado += digit
+        
+        self.entry_cpf.delete(0, ctk.END)
+        self.entry_cpf.insert(0, cpf_formatado)
+
+    def formatar_telefone(self, event):
+        telefone = self.entry_telefone.get()
+        telefone = ''.join(filter(str.isdigit, telefone))
+        telefone = telefone[:11]  # Limita a 11 dígitos
+        
+        if len(telefone) > 2:
+            telefone = f"({telefone[:2]}) {telefone[2:]}"
+        if len(telefone) > 10:
+            telefone = f"{telefone[:10]}-{telefone[10:]}"
+        
+        self.entry_telefone.delete(0, ctk.END)
+        self.entry_telefone.insert(0, telefone)
+
+    def formatar_data_nascimento(self, event):
+        data = self.entry_datanasc.get()
+        data = ''.join(filter(str.isdigit, data))
+        data = data[:8]  # Limita a 8 dígitos
+        
+        if len(data) > 2:
+            data = f"{data[:2]}/{data[2:]}"
+        if len(data) > 5:
+            data = f"{data[:5]}/{data[5:]}"
+        
+        self.entry_datanasc.delete(0, ctk.END)
+        self.entry_datanasc.insert(0, data)
 
     def preencher_campos(self, valores):
         self.entry_nome.delete(0, 'end')
@@ -235,7 +282,6 @@ class SistemaCadastroView:
         self.botao_cancelar = ctk.CTkButton(self.frame, text="Cancelar", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tabela_pacientes)
         self.botao_cancelar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
-
     def salvar_alteracoes(self, item):
         dados = self.obter_dados_formulario()
         self.controller.alterar_paciente(item, **dados)
@@ -265,6 +311,13 @@ class SistemaCadastroView:
                 paciente.email,
                 paciente.endereco
         ), tags=(tag,))
+        
+    def fechar_janela_alteracao(self):
+        # Destruir o frame de alteração
+        if hasattr(self, 'frame'):
+            self.frame.destroy()
+        # Exibir novamente a tabela de pacientes
+        self.exibir_tabela_pacientes()
 
     def mostrar_mensagem(self, titulo, mensagem):
         messagebox.showinfo(titulo, mensagem)

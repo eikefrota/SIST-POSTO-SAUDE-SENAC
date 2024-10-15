@@ -39,14 +39,15 @@ class SistemaCadastroController:
         self.view.mostrar_mensagem("Cadastro Concluído", "Pessoa cadastrada com sucesso!")
         self.view.limpar_campos()
 
-
-    def excluir_paciente(self, index):
-        paciente = self.model.obter_paciente_por_cpf()[index]
-        if self.view.confirmar_acao("Confirmar Exclusão", f"Tem certeza que deseja excluir o paciente '{paciente.nome}' do sistema?"):
-            self.model.remover_paciente(index)
+    def excluir_paciente(self, item):
+        valores = self.view.tabela.item(item, 'values')
+        nome = valores[0]  # O nome é o primeiro valor na tupla
+        if self.view.confirmar_acao("Confirmar Exclusão", f"Tem certeza que deseja excluir o paciente '{nome}' do sistema?"):
+            cpf = valores[1]  # O CPF é o segundo valor na tupla
+            self.model.remover_paciente_por_cpf(cpf)
             self.atualizar_tabela()
             self.view.mostrar_mensagem("Exclusão", "Paciente excluído com sucesso.")
-
+    
     def filtrar_pacientes(self, criterio):
         pacientes_filtrados = self.model.filtrar_pacientes(criterio)
         self.view.atualizar_tabela(pacientes_filtrados)
