@@ -1,11 +1,11 @@
 import customtkinter as ctk
 
-class MedicoInterface(ctk.CTk):
-    def __init__(self, controller):
-        ctk.CTk.__init__(self)
+class MedicoInterface(ctk.CTkFrame):
+    def __init__(self, master, controller):
+        super().__init__(master)
+        self.master = master
         self.controller = controller
-        self.title("Interface Médica")
-        self.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
+        self.pack(fill=ctk.BOTH, expand=True)
         
         # Configuração do layout principal
         self.grid_columnconfigure(0, weight=1)
@@ -77,10 +77,10 @@ class MedicoInterface(ctk.CTk):
         
         if nome and idade and sintomas and diagnostico:
             self.controller.salvar_prontuario(nome, idade, sintomas, diagnostico)
-            self.label_status.configure(text="Prontuário salvo com sucesso!", fg="green")
+            self.label_status.configure(text="Prontuário salvo com sucesso!", text_color="green")
             self.limpar_campos()
         else:
-            self.label_status.configure(text="Por favor, preencha todos os campos!", fg="red")
+            self.label_status.configure(text="Por favor, preencha todos os campos!", text_color="red")
 
     def listar_prontuarios(self):
         self.txt_prontuarios.delete("1.0", ctk.END)

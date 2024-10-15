@@ -107,3 +107,7 @@ class SistemaCadastroController:
             self.atualizar_tabela()
         else:
             self.view.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
+
+    def iniciar(self):
+        self.view = SistemaCadastroView(self.janela, self)
+        self.view.pack(fill="both", expand=True)

@@ -1,26 +1,50 @@
 import customtkinter as ctk
 from controller.controller import SistemaCadastroController
 from controller.medico_controller import MedicoController
+from controller.admin_controller import AdminController
+from view.tela_login import TelaLogin
+from model.model import UsuarioModel
 
+class MainController:
+    def __init__(self):
+        self.janela = ctk.CTk()
+        self.usuario_model = UsuarioModel()
+        self.tela_login = TelaLogin(self.janela, self)
 
-def iniciar_sistema_cadastro():
-    janela = ctk.CTk()
-    app = SistemaCadastroController(janela)
-    janela.mainloop()
+    def verificar_login(self, cpf, senha):
+        return self.usuario_model.verificar_credenciais(cpf, senha)
 
-def iniciar_interface_medico():
-    app = MedicoController()
-    app.iniciar()
+    def abrir_painel(self, tipo_usuario):
+        if tipo_usuario == 'admin':
+            self.mostrar_tela_admin()
+        elif tipo_usuario == 'medico':
+            self.mostrar_tela_medico()
+        elif tipo_usuario == 'recepcionista':
+            self.mostrar_tela_recepcionista()
+
+    def mostrar_tela_admin(self):
+        AdminController(self.janela, self)
+
+    def mostrar_tela_medico(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        medico_controller = MedicoController(self.janela)
+        medico_controller.iniciar()
+
+    def mostrar_tela_recepcionista(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        self.tela_recepcionista = SistemaCadastroController(self.janela)
+
+    def mostrar_tela_login(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        self.tela_login = TelaLogin(self.janela, self)
+
+    def iniciar(self):
+        self.mostrar_tela_login()
+        self.janela.mainloop()
 
 if __name__ == "__main__":
-    janela_principal = ctk.CTk()
-    janela_principal.title("Sistema Hospitalar")
-    janela_principal.geometry("300x200")
-
-    btn_cadastro = ctk.CTkButton(janela_principal, text="Sistema de Cadastro", command=iniciar_sistema_cadastro)
-    btn_cadastro.pack(pady=20)
-
-    btn_medico = ctk.CTkButton(janela_principal, text="Interface Médica", command=iniciar_interface_medico)
-    btn_medico.pack(pady=20)
-
-    janela_principal.mainloop()
+    app = MainController()
+    app.iniciar()

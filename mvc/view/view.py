@@ -53,29 +53,39 @@ class SistemaCadastroView:
 
     def exibir_tela_recepcionista(self):
         """Tela inicial para o recepcionista com layout padrão."""
+        # Limpar a janela atual
         for widget in self.janela.winfo_children():
             widget.destroy()
 
+        # Criar um novo frame
         self.frame_recepcionista = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
         self.frame_recepcionista.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.6)
 
         self.frame_recepcionista.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.frame_recepcionista.grid_rowconfigure((1, 10), weight=1)
 
+        # Criar logo e título
         self.criar_logo(self.frame_recepcionista)
         self.criar_titulo("Área do Recepcionista", self.frame_recepcionista)
 
+        # Botões
         self.botao_cadastro = ctk.CTkButton(self.frame_recepcionista, text="Cadastrar Paciente", 
-                                            font=("Arial", 18, "bold"), width=200, height=40, command=self.criar_interface_cadastro)
+                                            font=("Arial", 18, "bold"), width=200, height=40, 
+                                            command=self.criar_interface_cadastro)
         self.botao_cadastro.grid(row=3, column=1, padx=20, pady=20, sticky="e")
 
         self.botao_mostrar_tabela = ctk.CTkButton(self.frame_recepcionista, text="Consultar Paciente", 
-                                                font=("Arial", 18, "bold"), width=200, height=40, command=self.exibir_tabela_pacientes)
+                                                font=("Arial", 18, "bold"), width=200, height=40, 
+                                                command=self.exibir_tabela_pacientes)
         self.botao_mostrar_tabela.grid(row=3, column=2, padx=20, pady=20, sticky="w")
 
         self.botao_sair = ctk.CTkButton(self.frame_recepcionista, text="Sair", 
-                                        font=("Arial", 16, "bold"), width=100, height=30, command=self.janela.quit)
+                                        font=("Arial", 16, "bold"), width=100, height=30, 
+                                        command=self.janela.quit)
         self.botao_sair.grid(row=5, column=1, columnspan=2, padx=(5, 5), pady=10)
+
+        # Atualizar a janela
+        self.janela.update()
 
     def criar_interface_cadastro(self):
         for widget in self.janela.winfo_children():
