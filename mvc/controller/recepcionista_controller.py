@@ -61,7 +61,7 @@ class SistemaCadastroController:
     
     def exibir_tabela_pacientes(self):
         self.view.exibir_tabela_pacientes()
-        self.atualizar_tabela()  # Chamamos atualizar_tabela após criar a tabela
+        self.atualizar_tabela()
 
     def atualizar_tabela(self):
         pacientes = self.model.obter_pacientes()  # Use este método em vez de obter_paciente_por_cpf
@@ -91,13 +91,13 @@ class SistemaCadastroController:
         for validacao, msg in validacoes:
             if not validacao:
                 self.view.mostrar_erro("Erro de Validação", msg)
-                return
+                return False
 
         # Obter o paciente original
         paciente_original = self.model.obter_paciente_por_cpf(cpf)
         if not paciente_original:
             self.view.mostrar_erro("Erro", "Paciente não encontrado.")
-            return
+            return False
 
         # Atualizar apenas os campos editáveis
         paciente_atualizado = Paciente(
@@ -110,10 +110,10 @@ class SistemaCadastroController:
         )
 
         if self.model.atualizar_paciente(cpf, paciente_atualizado):
-            self.view.mostrar_mensagem("Alteração Concluída", "Dados do paciente atualizados com sucesso!")
-            self.atualizar_tabela()
+            return True
         else:
             self.view.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
+            return False
 
     def iniciar(self):
         self.view = SistemaCadastroView(self.janela, self)

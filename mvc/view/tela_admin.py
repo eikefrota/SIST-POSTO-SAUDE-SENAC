@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Menu
 from PIL import Image, ImageTk
 import os
 
@@ -104,8 +104,11 @@ class TelaAdmin:
             self.mostrar_erro("Erro", f"Não foi possível adicionar o {tipo}.")
 
     def listar_profissionais(self):
+        self.gerenciar_profissionais()
+
+    def gerenciar_profissionais(self):
         janela_lista = ctk.CTkToplevel(self.janela)
-        janela_lista.title("Lista de Profissionais")
+        janela_lista.title("Gerenciar Profissionais")
         janela_lista.geometry("600x400")
         janela_lista.transient(self.janela)
         janela_lista.grab_set()
@@ -113,7 +116,7 @@ class TelaAdmin:
         frame = ctk.CTkFrame(janela_lista)
         frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
 
-        ctk.CTkLabel(frame, text="Lista de Profissionais", font=("Arial", 18, "bold")).pack(pady=10)
+        ctk.CTkLabel(frame, text="Gerenciar Profissionais", font=("Arial", 18, "bold")).pack(pady=10)
 
         tree = ttk.Treeview(frame, columns=("Nome", "CPF", "Tipo"), show="headings")
         for col in ("Nome", "CPF", "Tipo"):
@@ -123,7 +126,28 @@ class TelaAdmin:
 
         profissionais = self.controller.listar_profissionais()
         for prof in profissionais:
-            tree.insert("", "end", values=(prof["nome"], prof["cpf"], prof["tipo"]))
+            tree.insert("", "end", values=(prof["nome"], str(prof["cpf"]), prof["tipo"]))
+
+        tree.bind("<Button-3>", lambda event: self.mostrar_menu_contexto_profissional(event, tree))
+
+    def mostrar_menu_contexto_profissional(self, event, tree):
+        item = tree.identify_row(event.y)
+        if item:
+            tree.selection_set(item)
+            menu = Menu(self.janela, tearoff=0)
+            menu.add_command(label="Excluir", command=lambda: self.excluir_profissional(tree))
+            menu.post(event.x_root, event.y_root)
+
+    def excluir_profissional(self, tree):
+        item_selecionado = tree.selection()[0]
+        profissional = tree.item(item_selecionado)['values']
+        if self.confirmar_acao("Confirmar Exclusão", f"Tem certeza que deseja excluir o profissional {profissional[0]}?"):
+            # Convertemos o CPF para string antes de passar para o controlador
+            if self.controller.excluir_profissional(str(profissional[1])):
+                tree.delete(item_selecionado)
+                self.mostrar_mensagem("Sucesso", "Profissional excluído com sucesso!")
+            else:
+                self.mostrar_erro("Erro", "Não foi possível excluir o profissional.")
 
     def fazer_logout(self):
         if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):

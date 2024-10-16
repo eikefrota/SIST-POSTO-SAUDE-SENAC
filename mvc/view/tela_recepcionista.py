@@ -298,8 +298,12 @@ class SistemaCadastroView:
 
     def salvar_alteracoes(self, item):
         dados = self.obter_dados_formulario()
-        self.controller.alterar_paciente(item, **dados)
-        self.exibir_tabela_pacientes()
+        if self.controller.alterar_paciente(item, **dados):
+            self.mostrar_mensagem("Sucesso", "Paciente atualizado com sucesso!")
+            self.fechar_janela_alteracao()
+            self.controller.exibir_tabela_pacientes()  # Chama o método do controlador para exibir a tabela
+        else:
+            self.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
 
     def iniciar_alteracao(self, item):
         # Obter os dados do item selecionado
@@ -308,8 +312,9 @@ class SistemaCadastroView:
         self.controller.iniciar_alteracao_paciente(item, valores)
 
     def atualizar_tabela(self, pacientes):
-        if not hasattr(self, 'tabela'):
-            # Se a tabela ainda não foi criada, não fazemos nada
+        if not hasattr(self, 'tabela') or not self.tabela.winfo_exists():
+            # Se a tabela não existe ou foi destruída, recriamos a interface
+            self.exibir_tabela_pacientes()
             return
 
         for item in self.tabela.get_children():

@@ -153,3 +153,18 @@ class UsuarioModel:
             self.session.commit()
             return True
         return False
+
+    def excluir_usuario(self, cpf):
+        try:
+            # Convertemos o CPF para string, caso não seja
+            cpf_str = str(cpf)
+            usuario = self.session.query(Usuario).filter_by(cpf=cpf_str).first()
+            if usuario:
+                self.session.delete(usuario)
+                self.session.commit()
+                return True
+            return False
+        except Exception as e:
+            print(f"Erro ao excluir usuário: {e}")
+            self.session.rollback()
+            return False

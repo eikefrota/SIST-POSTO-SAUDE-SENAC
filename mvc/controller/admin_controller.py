@@ -18,6 +18,9 @@ class AdminController:
         profissionais = self.model.listar_profissionais()
         return [{"nome": p.nome, "cpf": p.cpf, "tipo": p.tipo} for p in profissionais]
 
+    def excluir_profissional(self, cpf):
+        return self.model.excluir_usuario(str(cpf))
+
     def fazer_logout(self):
         self.main_controller.mostrar_tela_login()
 
