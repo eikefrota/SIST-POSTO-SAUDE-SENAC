@@ -1,5 +1,6 @@
 from model.model import UsuarioModel
 from view.tela_admin import TelaAdmin
+from tkinter import messagebox
 
 class AdminController:
     def __init__(self, janela, main_controller):
@@ -17,5 +18,8 @@ class AdminController:
         profissionais = self.model.listar_profissionais()
         return [{"nome": p.nome, "cpf": p.cpf, "tipo": p.tipo} for p in profissionais]
 
-    def voltar_para_login(self):
+    def fazer_logout(self):
         self.main_controller.mostrar_tela_login()
+
+    def confirmar_acao(self, titulo, mensagem):
+        return messagebox.askyesno(titulo, mensagem)

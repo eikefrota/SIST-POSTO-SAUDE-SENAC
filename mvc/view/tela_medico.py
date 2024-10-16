@@ -69,6 +69,9 @@ class MedicoInterface(ctk.CTkFrame):
         self.txt_prontuarios = ctk.CTkTextbox(self.frame_principal, width=500, height=200)
         self.txt_prontuarios.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
 
+        self.btn_sair = ctk.CTkButton(self.frame_principal, text="Sair", command=self.fazer_logout)
+        self.btn_sair.grid(row=9, column=0, columnspan=2, pady=10)
+
     def salvar_prontuario(self):
         nome = self.entry_nome.get()
         idade = self.entry_idade.get()
@@ -96,3 +99,8 @@ class MedicoInterface(ctk.CTkFrame):
         self.entry_idade.delete(0, ctk.END)
         self.entry_sintomas.delete("1.0", ctk.END)
         self.entry_diagnostico.delete("1.0", ctk.END)
+
+
+    def fazer_logout(self):
+        if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):
+            self.controller.fazer_logout()

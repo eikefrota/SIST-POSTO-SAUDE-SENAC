@@ -1,12 +1,13 @@
 from model.model import PacienteModel, Paciente
-from view.view import SistemaCadastroView
+from view.tela_recepcionista import SistemaCadastroView
 from validacao.validacoes import (validar_string, validar_cpf, validar_telefone, 
                          validar_email, validar_campos_preenchidos)
 
 class SistemaCadastroController:
-    def __init__(self, janela):
+    def __init__(self, janela, main_controller):
         self.model = PacienteModel()
         self.view = SistemaCadastroView(janela, self)
+        self.main_controller = main_controller
 
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email, endereco):
         # Validar campos preenchidos
@@ -38,6 +39,12 @@ class SistemaCadastroController:
         self.model.adicionar_paciente(novo_paciente)
         self.view.mostrar_mensagem("Cadastro Concluído", "Pessoa cadastrada com sucesso!")
         self.view.limpar_campos()
+
+    def fazer_logout(self):
+        self.main_controller.mostrar_tela_login()
+
+    def confirmar_acao(self, titulo, mensagem):
+        return self.view.confirmar_acao(titulo, mensagem)
 
     def excluir_paciente(self, item):
         valores = self.view.tabela.item(item, 'values')

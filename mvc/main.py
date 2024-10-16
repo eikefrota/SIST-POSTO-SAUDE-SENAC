@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from controller.controller import SistemaCadastroController
+from controller.recepcionista_controller import SistemaCadastroController
 from controller.medico_controller import MedicoController
 from controller.admin_controller import AdminController
 from view.tela_login import TelaLogin
@@ -23,18 +23,20 @@ class MainController:
             self.mostrar_tela_recepcionista()
 
     def mostrar_tela_admin(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
         AdminController(self.janela, self)
 
     def mostrar_tela_medico(self):
         for widget in self.janela.winfo_children():
             widget.destroy()
-        medico_controller = MedicoController(self.janela)
+        medico_controller = MedicoController(self.janela, self)
         medico_controller.iniciar()
 
     def mostrar_tela_recepcionista(self):
         for widget in self.janela.winfo_children():
             widget.destroy()
-        self.tela_recepcionista = SistemaCadastroController(self.janela)
+        self.tela_recepcionista = SistemaCadastroController(self.janela, self)
 
     def mostrar_tela_login(self):
         for widget in self.janela.winfo_children():

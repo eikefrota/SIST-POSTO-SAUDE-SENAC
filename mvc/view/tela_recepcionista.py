@@ -81,11 +81,15 @@ class SistemaCadastroView:
 
         self.botao_sair = ctk.CTkButton(self.frame_recepcionista, text="Sair", 
                                         font=("Arial", 16, "bold"), width=100, height=30, 
-                                        command=self.janela.quit)
+                                        command=self.fazer_logout)
         self.botao_sair.grid(row=5, column=1, columnspan=2, padx=(5, 5), pady=10)
 
         # Atualizar a janela
         self.janela.update()
+
+    def fazer_logout(self):
+        if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):
+            self.controller.fazer_logout()
 
     def criar_interface_cadastro(self):
         for widget in self.janela.winfo_children():
