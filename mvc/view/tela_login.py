@@ -50,9 +50,10 @@ class TelaLogin:
         self.label_logo = ctk.CTkLabel(self.frame, image=self.logo_image, text="")
         self.label_logo.grid(row=0, column=0, columnspan=2, pady=(10, 5), sticky="n")
 
-        # Campo Usuário
-        self.criar_label("Usuário", 1)
-        self.entry_usuario = self.criar_entry(self.icon_user, 2, "Digite seu usuário", show=False)
+        # Campo Usuário (CPF)
+        self.criar_label("CPF", 1)
+        self.entry_usuario = self.criar_entry(self.icon_user, 2, "Digite seu CPF", show=False)
+        self.entry_usuario.bind("<KeyRelease>", self.formatar_cpf)
 
         # Campo Senha
         self.criar_label("Senha", 3)
@@ -75,9 +76,28 @@ class TelaLogin:
         label_icon.grid(row=linha, column=0, padx=(0, 5), pady=(0, 20), sticky="e")
         return entry
 
+    def formatar_cpf(self, event):
+        cpf = self.entry_usuario.get()
+        cpf = ''.join(filter(str.isdigit, cpf))
+        cpf = cpf[:11]  # Limita a 11 dígitos
+        
+        cpf_formatado = ''
+        for i, digit in enumerate(cpf):
+            if i == 3 or i == 6:
+                cpf_formatado += '.'
+            elif i == 9:
+                cpf_formatado += '-'
+            cpf_formatado += digit
+        
+        self.entry_usuario.delete(0, ctk.END)
+        self.entry_usuario.insert(0, cpf_formatado)
+
     def verificar_login(self):
         usuario = self.entry_usuario.get()
         senha = self.entry_senha.get()
+
+        # Remover a formatação do CPF
+        usuario = ''.join(filter(str.isdigit, usuario))
 
         resultado = self.controller.verificar_login(usuario, senha)
         if resultado:

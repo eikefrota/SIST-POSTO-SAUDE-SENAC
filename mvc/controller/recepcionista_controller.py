@@ -5,9 +5,10 @@ from validacao.validacoes import (validar_string, validar_cpf, validar_telefone,
 
 class SistemaCadastroController:
     def __init__(self, janela, main_controller):
+        self.janela = janela
         self.model = PacienteModel()
-        self.view = SistemaCadastroView(janela, self)
         self.main_controller = main_controller
+        self.view = SistemaCadastroView(janela, self)
 
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email, endereco):
         # Validar campos preenchidos
@@ -41,7 +42,7 @@ class SistemaCadastroController:
         self.view.limpar_campos()
 
     def fazer_logout(self):
-        self.main_controller.mostrar_tela_login()
+        self.main_controller.fazer_logout()
 
     def confirmar_acao(self, titulo, mensagem):
         return self.view.confirmar_acao(titulo, mensagem)
@@ -115,6 +116,10 @@ class SistemaCadastroController:
             self.view.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
             return False
 
-    def iniciar(self):
-        self.view = SistemaCadastroView(self.janela, self)
-        self.view.pack(fill="both", expand=True)
+    def abrir_tela_agendamento(self):
+        self.main_controller.mostrar_tela_agendamento()
+
+    def abrir_tela_lista_agendamentos(self):
+        self.main_controller.mostrar_tela_lista_agendamentos()
+
+    

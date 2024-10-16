@@ -84,6 +84,16 @@ class SistemaCadastroView:
                                         command=self.fazer_logout)
         self.botao_sair.grid(row=5, column=1, columnspan=2, padx=(5, 5), pady=10)
 
+        self.botao_agendar = ctk.CTkButton(self.frame_recepcionista, text="Agendar Consulta", 
+                                           font=("Arial", 18, "bold"), width=200, height=40, 
+                                           command=self.controller.abrir_tela_agendamento)
+        self.botao_agendar.grid(row=4, column=1, padx=20, pady=20, sticky="e")
+
+        self.botao_listar_agendamentos = ctk.CTkButton(self.frame_recepcionista, text="Listar Agendamentos", 
+                                                       font=("Arial", 18, "bold"), width=200, height=40, 
+                                                       command=self.controller.abrir_tela_lista_agendamentos)
+        self.botao_listar_agendamentos.grid(row=4, column=2, padx=20, pady=20, sticky="w")
+
         # Atualizar a janela
         self.janela.update()
 
@@ -292,7 +302,7 @@ class SistemaCadastroView:
         self.botao_salvar = ctk.CTkButton(self.frame, text="Salvar Alterações", font=("Arial", 14, "bold"), width=200, height=30, command=lambda: self.salvar_alteracoes(item))
         self.botao_salvar.grid(row=9, column=1, padx=(5, 5), pady=20, sticky="e")
 
-        # Botão para cancelar
+        # Bot��o para cancelar
         self.botao_cancelar = ctk.CTkButton(self.frame, text="Cancelar", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tabela_pacientes)
         self.botao_cancelar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
@@ -364,3 +374,11 @@ class SistemaCadastroView:
     def limpar_campos(self):
         for entry in [self.entry_nome, self.entry_cpf, self.entry_datanasc, self.entry_telefone, self.entry_email, self.entry_endereco]:
             entry.delete(0, ctk.END)
+
+    def criar_widgets(self):
+        # ... (código existente) ...
+
+        self.btn_agendar = ctk.CTkButton(self.frame, text="Agendar Consulta", command=self.controller.abrir_tela_agendamento)
+        self.btn_agendar.grid(row=7, column=0, columnspan=2, pady=10)
+
+        # ... (resto do código) ...

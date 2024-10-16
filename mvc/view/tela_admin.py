@@ -60,7 +60,7 @@ class TelaAdmin:
     def mostrar_formulario(self, tipo_profissional):
         janela_form = ctk.CTkToplevel(self.janela)
         janela_form.title(f"Adicionar {tipo_profissional}")
-        janela_form.geometry("400x300")
+        janela_form.geometry("400x400")
         janela_form.transient(self.janela)
         janela_form.grab_set()
 

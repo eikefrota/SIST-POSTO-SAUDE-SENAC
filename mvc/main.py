@@ -2,8 +2,11 @@ import customtkinter as ctk
 from controller.recepcionista_controller import SistemaCadastroController
 from controller.medico_controller import MedicoController
 from controller.admin_controller import AdminController
+from controller.agendamento_controller import AgendamentoController
 from view.tela_login import TelaLogin
 from model.model import UsuarioModel
+from tkinter import messagebox
+from view.tabela_agendamentos import TelaListaAgendamentos
 
 class MainController:
     def __init__(self):
@@ -38,6 +41,12 @@ class MainController:
             widget.destroy()
         self.tela_recepcionista = SistemaCadastroController(self.janela, self)
 
+    def mostrar_tela_agendamento(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        agendamento_controller = AgendamentoController(self.janela, self)
+        agendamento_controller.iniciar()
+
     def mostrar_tela_login(self):
         for widget in self.janela.winfo_children():
             widget.destroy()
@@ -47,6 +56,23 @@ class MainController:
         self.mostrar_tela_login()
         self.janela.mainloop()
 
+    def fazer_logout(self):
+        self.mostrar_tela_login()    
+
+    def mostrar_mensagem(self, titulo, mensagem):
+        messagebox.showinfo(titulo, mensagem)
+
+    def mostrar_erro(self, titulo, mensagem):
+        messagebox.showerror(titulo, mensagem)
+
+    def mostrar_tela_lista_agendamentos(self):
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        agendamento_controller = AgendamentoController(self.janela, self)
+        tela_lista_agendamentos = TelaListaAgendamentos(self.janela, agendamento_controller)
+        tela_lista_agendamentos.pack(fill="both", expand=True)
+
 if __name__ == "__main__":
     app = MainController()
     app.iniciar()
+    
