@@ -23,7 +23,7 @@ class TelaAdmin:
             widget.destroy()
 
         self.frame_admin = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
-        self.frame_admin.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.6)
+        self.frame_admin.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
 
         self.frame_admin.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.frame_admin.grid_rowconfigure((1, 10), weight=1)

@@ -25,7 +25,7 @@ class TelaLogin:
 
         # Frame centralizado
         self.frame = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="#FFFFFF")
-        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.2, relheight=0.5)
+        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.3, relheight=0.6)
 
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_columnconfigure(1, weight=1)

@@ -13,8 +13,9 @@ class AgendamentoController:
         self.view = None
 
     def iniciar(self):
-        self.view = TelaAgendamento(self.janela, self)
-        self.view.pack(fill="both", expand=True)
+        if self.view is None:
+            self.view = TelaAgendamento(self.janela, self)
+        self.view.mostrar()
 
     def listar_pacientes(self):
         return self.paciente_model.listar_pacientes()
@@ -46,7 +47,7 @@ class AgendamentoController:
         self.main_controller.mostrar_mensagem(titulo, mensagem)
 
     def mostrar_erro(self, titulo, mensagem):
-        messagebox.showerror(titulo, mensagem)
+        self.main_controller.mostrar_erro(titulo, mensagem)
 
     def abrir_tela_lista_agendamentos(self):
         self.view = TelaListaAgendamentos(self.janela, self)
@@ -69,7 +70,12 @@ class AgendamentoController:
             messagebox.showerror("Erro", "Não foi possível cancelar o agendamento.")
 
     def voltar_tela_recepcionista(self):
+        if self.view:
+            self.view.esconder()
         self.main_controller.mostrar_tela_recepcionista()
 
     def set_view(self, view):
         self.view = view
+
+    def pesquisar_pacientes(self, termo_pesquisa):
+        return self.paciente_model.pesquisar_pacientes(termo_pesquisa)

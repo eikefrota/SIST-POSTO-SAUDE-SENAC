@@ -99,6 +99,15 @@ class PacienteModel:
     def listar_pacientes(self):
         return self.session.query(Paciente).all()
 
+    def pesquisar_pacientes(self, termo_pesquisa):
+        try:
+            return self.session.query(Paciente).filter(
+                (Paciente.nome.ilike(f"%{termo_pesquisa}%")) | (Paciente.cpf.ilike(f"%{termo_pesquisa}%"))
+            ).all()
+        except Exception as e:
+            print(f"Erro ao pesquisar pacientes: {str(e)}")
+            return []
+
 class ProntuarioModel:
     def __init__(self):
         self.session = db_manager.get_session()

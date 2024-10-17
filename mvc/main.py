@@ -72,6 +72,9 @@ class MainController:
         tela_lista_agendamentos = TelaListaAgendamentos(self.janela, agendamento_controller)
         tela_lista_agendamentos.pack(fill="both", expand=True)
 
+    def voltar_para_recepcionista(self):
+        self.mostrar_tela_recepcionista()
+
 if __name__ == "__main__":
     app = MainController()
     app.iniciar()
