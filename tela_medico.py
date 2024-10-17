@@ -2,6 +2,8 @@ import customtkinter as ctk
 from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from PIL import Image, ImageTk
+
 
 # Configuração do banco de dados
 DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost/senac"
@@ -10,14 +12,18 @@ engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 
 # Definindo o modelo do prontuário
-class Prontuario(Base):
-    __tablename__ = 'prontuarios'
+class Paciente(Base):
+    __tablename__ = 'pacientes'
     
     id = Column(Integer, primary_key=True)
     nome = Column(String, nullable=False)
-    idade = Column(Integer, nullable=False)
-    sintomas = Column(Text, nullable=False)
-    diagnostico = Column(Text, nullable=False)
+    cpf = Column(String, nullable=False)
+    data_nascimento = Column(String, nullable=False)
+    telefone = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    endereco = Column(String, nullable=False)
+    sintomas = Column(Text)
+    diagnostico = Column(Text)
 
 # Criar a tabela no banco de dados
 Base.metadata.create_all(engine)
@@ -29,6 +35,10 @@ session = Session()
 # Classe para a interface do médico
 class MedicoInterface(ctk.CTk):
     def __init__(self):
+
+                # Constantes
+        self.logo_path = "imagens/logo.png"
+
         # Inicializa a classe CTk
         ctk.CTk.__init__(self)  # Corrigido para garantir que a classe pai seja inicializada
         self.title("Interface Médica")
@@ -47,85 +57,106 @@ class MedicoInterface(ctk.CTk):
         
         # Configuração do grid dentro do frame
         self.frame_principal.grid_columnconfigure(1, weight=1)
+
+        self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         
         # Widgets da interface
         self.create_widgets()
+
+    def carregar_imagem(self, caminho, tamanho, ctk_image=True):
+        """Carrega e redimensiona uma imagem."""
+        imagem = Image.open(caminho)
+        imagem = imagem.resize(tamanho, Image.LANCZOS)
+        if ctk_image:
+            return ctk.CTkImage(imagem, size=tamanho)
+        return ImageTk.PhotoImage(imagem)
     
     def create_widgets(self):
-        # Labels e Entradas para os dados do paciente
-        self.label_nome = ctk.CTkLabel(self.frame_principal, text="Nome do Paciente:")
-        self.label_nome.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        
-        self.entry_nome = ctk.CTkEntry(self.frame_principal)
-        self.entry_nome.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
-        
-        self.label_idade = ctk.CTkLabel(self.frame_principal, text="Idade:")
-        self.label_idade.grid(row=1, column=0, padx=10, pady=10, sticky="w")
-        
-        self.entry_idade = ctk.CTkEntry(self.frame_principal)
-        self.entry_idade.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+     
         
         self.label_sintomas = ctk.CTkLabel(self.frame_principal, text="Sintomas:")
-        self.label_sintomas.grid(row=2, column=0, padx=10, pady=10, sticky="nw")
+        self.label_sintomas.grid(row=3, column=0, padx=(10,0), pady=10, sticky="w")
         
-        self.entry_sintomas = ctk.CTkTextbox(self.frame_principal, height=70)
-        self.entry_sintomas.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
+        self.entry_sintomas = ctk.CTkTextbox(self.frame_principal, height=120, width=200)
+        self.entry_sintomas.grid(row=3, column=1, padx=0, pady=10, sticky="w")
         
         self.label_diagnostico = ctk.CTkLabel(self.frame_principal, text="Diagnóstico:")
-        self.label_diagnostico.grid(row=3, column=0, padx=10, pady=10, sticky="nw")
+        self.label_diagnostico.grid(row=3, column=2, padx=10, pady=10, sticky="e")
         
-        self.entry_diagnostico = ctk.CTkTextbox(self.frame_principal, height=70)
-        self.entry_diagnostico.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+        self.entry_diagnostico = ctk.CTkTextbox(self.frame_principal, height=120, width=200)
+        self.entry_diagnostico.grid(row=3, column=3, padx=(5,50), pady=10, sticky="e")
         
-        # Botão para salvar os dados do prontuário
-        self.btn_salvar = ctk.CTkButton(self.frame_principal, text="Salvar Prontuário", command=self.salvar_prontuario, width=190,height=30 )
-        self.btn_salvar.grid(row=4, column=0, columnspan=2, padx=0, pady=20)
         
         # Botão para listar os prontuários
-        self.btn_listar = ctk.CTkButton(self.frame_principal, text="Listar Prontuários", command=self.listar_prontuarios, width=190,height=30 )
-        self.btn_listar.grid(row=5, column=0, columnspan=2, padx=10, pady=5,)
+        self.btn_listar = ctk.CTkButton(self.frame_principal, text="Listar Pacientes", command=self.listar_pacientes, width=190,height=30 )
+        self.btn_listar.grid(row=5, column=2, columnspan=2, padx=(0,10), pady=5)
         
         # Label para exibir status ou mensagens
         self.label_status = ctk.CTkLabel(self.frame_principal, text="")
-        self.label_status.grid(row=6, column=0, columnspan=2, padx=10, pady=5)
+        self.label_status.grid(row=6, column=0,  padx=10, pady=5)
         
         # Textbox para mostrar a lista de prontuários
-        self.txt_prontuarios = ctk.CTkTextbox(self.frame_principal, height=150)
-        self.txt_prontuarios.grid(row=7, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        
-    def salvar_prontuario(self):
-        nome = self.entry_nome.get()
-        idade = self.entry_idade.get()
-        sintomas = self.entry_sintomas.get("1.0", "end-1c")
-        diagnostico = self.entry_diagnostico.get("1.0", "end-1c")
-        
-        if nome and idade and sintomas and diagnostico:
-            # Cria um novo prontuário
-            novo_prontuario = Prontuario(nome=nome, idade=int(idade), sintomas=sintomas, diagnostico=diagnostico)
-            session.add(novo_prontuario)  # Adiciona à sessão
-            session.commit()  # Comita a sessão para o banco de dados
-            
-            self.label_status.configure(text="Prontuário salvo com sucesso!", fg="green")
-            
-            # Limpar campos
-            self.entry_nome.delete(0, ctk.END)
-            self.entry_idade.delete(0, ctk.END)
-            self.entry_sintomas.delete("1.0", ctk.END)
-            self.entry_diagnostico.delete("1.0", ctk.END)
-        else:
-            self.label_status.configure(text="Por favor, preencha todos os campos!", fg="red")
+        self.txt_pacientes = ctk.CTkTextbox(self.frame_principal, height=150, width=190)
+        self.txt_pacientes.grid(row=7, column=1, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-    def listar_prontuarios(self):
+        # Botão para editar sintomas
+        self.btn_editar_sintomas = ctk.CTkButton(self.frame_principal, text="Editar Sintomas", command=self.editar_sintomas, width=190, height=30)
+        self.btn_editar_sintomas.grid(row=5, column=0, padx=(50, 0),pady=5)
+        
+        # Botão para editar diagnóstico
+        self.btn_editar_diagnostico = ctk.CTkButton(self.frame_principal, text="Editar Diagnóstico", command=self.editar_diagnostico, width=190, height=30)
+        self.btn_editar_diagnostico.grid(row=5, column=1, columnspan=2, padx=10, pady=5)
+        
+        # Adicione estes campos de entrada
+        self.entry_id_editar = ctk.CTkEntry(self.frame_principal, placeholder_text="ID do Paciente")
+        self.entry_id_editar.grid(row=6, column=1, columnspan=2, padx=10, pady=5)
+
+    # ... outras funções existentes ...
+
+    def editar_sintomas(self):
+        id_paciente = self.entry_id_editar.get()
+        if not id_paciente:
+            self.label_status.configure(text="Por favor, insira o ID do paciente!", fg="red")
+            return
+        
+        paciente = session.query(Paciente).filter_by(id=id_paciente).first()
+        if paciente:
+            novos_sintomas = self.entry_sintomas.get("1.0", "end-1c")
+            paciente.sintomas = novos_sintomas
+            session.commit()
+            self.label_status.configure(text="Sintomas atualizados com sucesso!", fg="green")
+            self.listar_pacientes()  # Atualiza a lista de pacientes
+        else:
+            self.label_status.configure(text="Paciente não encontrado!", fg="red")
+
+    def editar_diagnostico(self):
+        id_paciente = self.entry_id_editar.get()
+        if not id_paciente:
+            self.label_status.configure(text="Por favor, insira o ID do paciente!", fg="red")
+            return
+        
+        paciente = session.query(Paciente).filter_by(id=id_paciente).first()
+        if paciente:
+            novo_diagnostico = self.entry_diagnostico.get("1.0", "end-1c")
+            paciente.diagnostico = novo_diagnostico
+            session.commit()
+            self.label_status.configure(text="Diagnóstico atualizado com sucesso!", fg="green")
+            self.listar_pacientes()  # Atualiza a lista de pacientes
+        else:
+            self.label_status.configure(text="Paciente não encontrado!", fg="red")
+        
+    
+    def listar_pacientes(self):
         # Limpa a textbox antes de listar
-        self.txt_prontuarios.delete("1.0", ctk.END)
+        self.txt_pacientes.delete("1.0", ctk.END)
         
         # Consulta todos os prontuários
-        prontuarios = session.query(Prontuario).all()
+        pacientes = session.query(Paciente).all()
         
         # Adiciona os prontuários na textbox
-        if prontuarios:
-            for prontuario in prontuarios:
-                self.txt_prontuarios.insert(ctk.END, f"ID: {prontuario.id}\nNome: {prontuario.nome}\nIdade: {prontuario.idade}\nSintomas: {prontuario.sintomas}\nDiagnóstico: {prontuario.diagnostico}\n\n")
+        if pacientes:
+            for paciente in pacientes:
+                self.txt_pacientes.insert(ctk.END, f"ID: {paciente.id}\nNome: {paciente.nome}\nData_nascimento: {paciente.data_nascimento}\nTelefone: {paciente.telefone}\nEmail: {paciente.email}\nEndereco: {paciente.endereco}\n Sintomas: {paciente.sintomas}\nDiagnóstico: {paciente.diagnostico}\n\n")
         else:
-            self.txt_prontuarios.insert(ctk.END, "Nenhum prontuário encontrado.")
+            self.txt_paciente.insert(ctk.END, "Nenhum prontuário encontrado.")
 
