@@ -375,10 +375,4 @@ class SistemaCadastroView:
         for entry in [self.entry_nome, self.entry_cpf, self.entry_datanasc, self.entry_telefone, self.entry_email, self.entry_endereco]:
             entry.delete(0, ctk.END)
 
-    def criar_widgets(self):
-        # ... (código existente) ...
-
-        self.btn_agendar = ctk.CTkButton(self.frame, text="Agendar Consulta", command=self.controller.abrir_tela_agendamento)
-        self.btn_agendar.grid(row=7, column=0, columnspan=2, pady=10)
-
-        # ... (resto do código) ...
+ 
