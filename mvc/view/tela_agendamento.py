@@ -10,7 +10,7 @@ class TelaAgendamento:
         self.janela = janela
         self.controller = controller
         self.configurar_janela()
-        self.logo_path = os.path.abspath("C:/Users/Clean Vision/OneDrive/Área de Trabalho/logo/logo.png")
+        self.logo_path = os.path.abspath("mvc\imagens\logo.png")
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         self.criar_interface_agendamento()
 

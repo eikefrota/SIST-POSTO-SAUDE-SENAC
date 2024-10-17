@@ -8,12 +8,12 @@ class Paciente(Base):
     __tablename__ = 'pacientes'
     
     id = Column(Integer, primary_key=True)
-    nome = Column(String, nullable=False)
-    cpf = Column(String, nullable=False, unique=True)
-    data_nascimento = Column(String, nullable=False)
-    telefone = Column(String, nullable=False)
-    email = Column(String, nullable=False)
-    endereco = Column(String, nullable=False)
+    nome = Column(String(100), nullable=False)
+    cpf = Column(String(14), nullable=False, unique=True)
+    data_nascimento = Column(String(10), nullable=False)
+    telefone = Column(String(20), nullable=False)
+    email = Column(String(100), nullable=False)
+    endereco = Column(String(200), nullable=False)
     consultas = relationship("Consulta", back_populates="paciente")
 
     def __init__(self, nome, cpf, data_nascimento, telefone, email, endereco):
@@ -28,7 +28,7 @@ class Prontuario(Base):
     __tablename__ = 'prontuarios'
     
     id = Column(Integer, primary_key=True)
-    nome = Column(String, nullable=False)
+    nome = Column(String(100), nullable=False)
     idade = Column(Integer, nullable=False)
     sintomas = Column(Text, nullable=False)
     diagnostico = Column(Text, nullable=False)
@@ -37,18 +37,29 @@ class Usuario(Base):
     __tablename__ = 'usuarios'
 
     id = Column(Integer, primary_key=True)
-    nome = Column(String, nullable=False)
-    cpf = Column(String, nullable=False, unique=True)
-    senha = Column(String, nullable=False)
-    tipo = Column(String, nullable=False)
-    crm = Column(String, nullable=False)
+    nome = Column(String(100), nullable=False)
+    cpf = Column(String(14), nullable=False, unique=True)
+    senha = Column(String(100), nullable=False)
+    tipo = Column(String(20), nullable=False)
+    crm = Column(String(20), nullable=True)
     consultas = relationship("Consulta", back_populates="medico")
+
+class Consulta(Base):
+    __tablename__ = 'consultas'
+
+    id = Column(Integer, primary_key=True)
+    paciente_id = Column(Integer, ForeignKey('pacientes.id'), nullable=False)
+    medico_id = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
+    data_hora = Column(DateTime, nullable=False)
+    status = Column(String(20), nullable=False, default='Agendada')
+
+    paciente = relationship("Paciente", back_populates="consultas")
+    medico = relationship("Usuario", back_populates="consultas")
 
 class DatabaseManager:
     def __init__(self):
         DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost/senac"
         self.engine = create_engine(DATABASE_URL)
-        Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
 
     def get_session(self):
@@ -125,16 +136,19 @@ class UsuarioModel:
         self.session = db_manager.get_session()
 
     def adicionar_usuario(self, nome, cpf, senha, tipo, crm=None):
-        novo_usuario = Usuario(nome=nome, cpf=cpf, senha=senha, tipo=tipo, crm=crm)
-        self.session.add(novo_usuario)
         try:
+            if tipo == 'medico':
+                novo_usuario = Usuario(nome=nome, cpf=cpf, senha=senha, tipo=tipo, crm=crm)
+            else:
+                novo_usuario = Usuario(nome=nome, cpf=cpf, senha=senha, tipo=tipo, crm=None)
+            
+            self.session.add(novo_usuario)
             self.session.commit()
             return True
         except Exception as e:
             self.session.rollback()
             print(f"Erro ao adicionar usuário: {str(e)}")
             return False
-
 
     def obter_usuario_por_cpf(self, cpf):
         return self.session.query(Usuario).filter_by(cpf=cpf).first()
@@ -173,7 +187,6 @@ class UsuarioModel:
 
     def excluir_usuario(self, cpf):
         try:
-            # Convertemos o CPF para string, caso não seja
             cpf_str = str(cpf)
             usuario = self.session.query(Usuario).filter_by(cpf=cpf_str).first()
             if usuario:
@@ -191,18 +204,6 @@ class UsuarioModel:
 
     def obter_usuario_por_crm(self, crm):
         return self.session.query(Usuario).filter_by(crm=crm).first()
-
-class Consulta(Base):
-    __tablename__ = 'consultas'
-
-    id = Column(Integer, primary_key=True)
-    paciente_id = Column(Integer, ForeignKey('pacientes.id'), nullable=False)
-    medico_id = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
-    data_hora = Column(DateTime, nullable=False)
-    status = Column(String, nullable=False, default='Agendada')
-
-    paciente = relationship("Paciente", back_populates="consultas")
-    medico = relationship("Usuario", back_populates="consultas")
 
 class ConsultaModel:
     def __init__(self):
@@ -229,3 +230,6 @@ class ConsultaModel:
         return self.session.query(Consulta).filter(
             Consulta.data_hora.between(data_inicial, data_final)
         ).all()
+
+# Cria as tabelas no banco de dados
+db_manager.create_tables()
