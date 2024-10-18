@@ -9,7 +9,7 @@ class TelaAdmin:
         self.controller = controller
         self.janela.title("Painel do Administrador")
         self.janela.geometry(f"{self.janela.winfo_screenwidth()}x{self.janela.winfo_screenheight()}+0+0")
-        self.logo_path = os.path.abspath("mvc\imagens\logo.png")
+        self.logo_path = os.path.abspath("mvc/imagens/logo.png")
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         self.criar_interface_admin()
 
