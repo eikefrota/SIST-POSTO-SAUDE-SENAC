@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from datetime import date, datetime, time
 
 Base = declarative_base()
 
@@ -15,6 +16,7 @@ class Paciente(Base):
     email = Column(String(100), nullable=False)
     endereco = Column(String(200), nullable=False)
     consultas = relationship("Consulta", back_populates="paciente")
+    prontuario = relationship("Prontuario", uselist=False, back_populates="paciente")
 
     def __init__(self, nome, cpf, data_nascimento, telefone, email, endereco):
         self.nome = nome
@@ -28,10 +30,13 @@ class Prontuario(Base):
     __tablename__ = 'prontuarios'
     
     id = Column(Integer, primary_key=True)
-    nome = Column(String(100), nullable=False)
-    idade = Column(Integer, nullable=False)
-    sintomas = Column(Text, nullable=False)
-    diagnostico = Column(Text, nullable=False)
+    paciente_id = Column(Integer, ForeignKey('pacientes.id'), unique=True)
+    historico = Column(Text)
+    medicacoes = Column(Text)
+    alergias = Column(Text)
+    observacoes = Column(Text)
+
+    paciente = relationship("Paciente", back_populates="prontuario")
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -48,10 +53,10 @@ class Consulta(Base):
     __tablename__ = 'consultas'
 
     id = Column(Integer, primary_key=True)
-    paciente_id = Column(Integer, ForeignKey('pacientes.id'), nullable=False)
-    medico_id = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
+    paciente_id = Column(Integer, ForeignKey('pacientes.id'))
+    medico_id = Column(Integer, ForeignKey('usuarios.id'))
     data_hora = Column(DateTime, nullable=False)
-    status = Column(String(20), nullable=False, default='Agendada')
+    status = Column(String(20), default='Agendado')
 
     paciente = relationship("Paciente", back_populates="consultas")
     medico = relationship("Usuario", back_populates="consultas")
@@ -110,11 +115,12 @@ class PacienteModel:
     def listar_pacientes(self):
         return self.session.query(Paciente).all()
 
-    def pesquisar_pacientes(self, termo_pesquisa):
+    def pesquisar_pacientes(self, cpf):
         try:
-            return self.session.query(Paciente).filter(
-                (Paciente.nome.ilike(f"%{termo_pesquisa}%")) | (Paciente.cpf.ilike(f"%{termo_pesquisa}%"))
-            ).all()
+            cpf_formatado = f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
+            pacientes = self.session.query(Paciente).filter(Paciente.cpf == cpf_formatado).all()
+            print(f"Pacientes encontrados: {pacientes}")  # Para debug
+            return pacientes
         except Exception as e:
             print(f"Erro ao pesquisar pacientes: {str(e)}")
             return []
@@ -130,6 +136,27 @@ class ProntuarioModel:
 
     def obter_prontuarios(self):
         return self.session.query(Prontuario).all()
+
+    def adicionar_ou_atualizar_prontuario(self, cpf, dados_prontuario):
+        paciente = self.session.query(Paciente).filter_by(cpf=cpf).first()
+        if not paciente:
+            return False
+
+        prontuario = self.session.query(Prontuario).filter_by(paciente_id=paciente.id).first()
+        if prontuario:
+            for key, value in dados_prontuario.items():
+                setattr(prontuario, key, value)
+        else:
+            prontuario = Prontuario(paciente_id=paciente.id, **dados_prontuario)
+            self.session.add(prontuario)
+        self.session.commit()
+        return True
+
+    def obter_prontuario_por_cpf(self, cpf):
+        paciente = self.session.query(Paciente).filter_by(cpf=cpf).first()
+        if paciente:
+            return self.session.query(Prontuario).filter_by(paciente_id=paciente.id).first()
+        return None
 
 class UsuarioModel:
     def __init__(self):
@@ -230,6 +257,44 @@ class ConsultaModel:
         return self.session.query(Consulta).filter(
             Consulta.data_hora.between(data_inicial, data_final)
         ).all()
+
+    def pesquisar_consultas_por_paciente(self, termo_pesquisa):
+        return self.session.query(Consulta).join(Paciente).filter(
+            or_(
+                Paciente.nome.ilike(f"%{termo_pesquisa}%"),
+                Paciente.cpf.ilike(f"%{termo_pesquisa}%")
+            )
+        ).all()
+
+    def listar_consultas_do_dia(self):
+        hoje = date.today()
+        inicio_dia = datetime.combine(hoje, time.min)
+        fim_dia = datetime.combine(hoje, time.max)
+        return self.session.query(Consulta).filter(
+            Consulta.data_hora.between(inicio_dia, fim_dia),
+            Consulta.status != 'Atendido'
+        ).all()
+
+    def atualizar_status_consulta(self, consulta_id, novo_status):
+        consulta = self.session.query(Consulta).get(consulta_id)
+        if consulta:
+            consulta.status = novo_status
+            self.session.commit()
+            return True
+        return False
+
+    def atualizar_status_consulta_por_cpf(self, cpf, novo_status):
+        consulta = self.session.query(Consulta).join(Paciente).filter(
+            Paciente.cpf == cpf,
+            Consulta.status != 'Atendido',
+            Consulta.data_hora >= datetime.combine(date.today(), time.min)
+        ).order_by(Consulta.data_hora).first()
+        
+        if consulta:
+            consulta.status = novo_status
+            self.session.commit()
+            return True
+        return False
 
 # Cria as tabelas no banco de dados
 db_manager.create_tables()

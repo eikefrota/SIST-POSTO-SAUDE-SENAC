@@ -5,11 +5,11 @@ def adicionar_pacientes_em_massa():
     paciente_model = PacienteModel()
 
     pacientes = [
-        Paciente("João Silva", "12345678901", "1980-01-15", "(11) 98765-4321", "joao@email.com", "Rua A, 123"),
-        Paciente("Maria Santos", "23456789012", "1992-05-20", "(11) 97654-3210", "maria@email.com", "Av. B, 456"),
-        Paciente("Pedro Oliveira", "34567890123", "1975-11-30", "(11) 96543-2109", "pedro@email.com", "Praça C, 789"),
-        Paciente("Ana Rodrigues", "45678901234", "1988-07-10", "(11) 95432-1098", "ana@email.com", "Alameda D, 1011"),
-        Paciente("Carlos Ferreira", "56789012345", "1995-03-25", "(11) 94321-0987", "carlos@email.com", "Travessa E, 1213"),
+        Paciente("João Silva", "123.456.789-01", "11/09/1980", "(11) 98765-4321", "joao@email.com", "Rua A, 123"),
+        Paciente("Maria Santos", "234.567.890-12", "11/05/1992", "(11) 97654-3210", "maria@email.com", "Av. B, 456"),
+        Paciente("Pedro Oliveira", "345.678.901-23", "11/11/1975", "(11) 96543-2109", "pedro@email.com", "Praça C, 789"),
+        Paciente("Ana Rodrigues", "456.789.012-34", "11/07/1988", "(11) 95432-1098", "ana@email.com", "Alameda D, 1011"),
+        Paciente("Carlos Ferreira", "567.890.123-45", "11/03/1995", "(11) 94321-0987", "carlos@email.com", "Travessa E, 1213"),
         # Adicione mais pacientes conforme necessário
     ]
 

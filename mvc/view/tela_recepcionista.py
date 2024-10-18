@@ -95,7 +95,7 @@ class SistemaCadastroView:
         self.botao_listar_agendamentos.grid(row=4, column=2, padx=20, pady=20, sticky="w")
 
         # Atualizar a janela
-        self.janela.update()
+        self.janela.update_idletasks()
 
     def fazer_logout(self):
         if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):

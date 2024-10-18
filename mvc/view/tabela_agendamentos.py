@@ -6,8 +6,11 @@ from datetime import datetime
 class TelaListaAgendamentos(ctk.CTkFrame):
     def __init__(self, master, controller):
         super().__init__(master)
+        self.master = master
         self.controller = controller
-        self.controller.set_view(self)  # Adicione esta linha
+        self.tree_agendamentos = None
+        self.entry_data_inicial = None
+        self.entry_data_final = None
         self.criar_widgets()
 
     def criar_widgets(self):
@@ -39,6 +42,28 @@ class TelaListaAgendamentos(ctk.CTkFrame):
         self.btn_filtrar.grid(row=0, column=4, padx=5, pady=5)
 
         # Tabela de agendamentos
+        self.criar_tabela()
+
+        # Scrollbar
+        self.scrollbar_y = ttk.Scrollbar(self, orient="vertical", command=self.tree_agendamentos.yview)
+        self.scrollbar_y.grid(row=2, column=1, sticky="ns")
+        self.tree_agendamentos.configure(yscrollcommand=self.scrollbar_y.set)
+
+        self.scrollbar_x = ttk.Scrollbar(self, orient="horizontal", command=self.tree_agendamentos.xview)
+        self.scrollbar_x.grid(row=3, column=0, sticky="ew")
+        self.tree_agendamentos.configure(xscrollcommand=self.scrollbar_x.set)
+
+        # Botões de ação
+        self.frame_acoes = ctk.CTkFrame(self)
+        self.frame_acoes.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+
+        self.btn_cancelar = ctk.CTkButton(self.frame_acoes, text="Cancelar Agendamento", command=self.cancelar_agendamento)
+        self.btn_cancelar.pack(side="left", padx=5)
+
+        self.btn_voltar = ctk.CTkButton(self.frame_acoes, text="Voltar", command=self.voltar)
+        self.btn_voltar.pack(side="right", padx=5)
+
+    def criar_tabela(self):
         colunas = ("ID", "Paciente", "Médico", "Data/Hora", "Status")
         self.tree_agendamentos = ttk.Treeview(self, columns=colunas, show="headings")
         
@@ -62,29 +87,13 @@ class TelaListaAgendamentos(ctk.CTkFrame):
 
         self.tree_agendamentos.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
 
-        # Scrollbar
-        self.scrollbar_y = ttk.Scrollbar(self, orient="vertical", command=self.tree_agendamentos.yview)
-        self.scrollbar_y.grid(row=2, column=1, sticky="ns")
-        self.tree_agendamentos.configure(yscrollcommand=self.scrollbar_y.set)
-
-        self.scrollbar_x = ttk.Scrollbar(self, orient="horizontal", command=self.tree_agendamentos.xview)
-        self.scrollbar_x.grid(row=3, column=0, sticky="ew")
-        self.tree_agendamentos.configure(xscrollcommand=self.scrollbar_x.set)
-
-        # Botões de ação
-        self.frame_acoes = ctk.CTkFrame(self)
-        self.frame_acoes.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
-
-        self.btn_cancelar = ctk.CTkButton(self.frame_acoes, text="Cancelar Agendamento", command=self.cancelar_agendamento)
-        self.btn_cancelar.pack(side="left", padx=5)
-
-        self.btn_voltar = ctk.CTkButton(self.frame_acoes, text="Voltar", command=self.voltar)
-        self.btn_voltar.pack(side="right", padx=5)
-
     def filtrar_agendamentos(self):
-        data_inicial = self.entry_data_inicial.get_date()
-        data_final = self.entry_data_final.get_date()
-        self.controller.filtrar_agendamentos(data_inicial, data_final)
+        if hasattr(self, 'entry_data_inicial') and hasattr(self, 'entry_data_final'):
+            data_inicial = self.entry_data_inicial.get_date()
+            data_final = self.entry_data_final.get_date()
+            self.controller.filtrar_agendamentos(data_inicial, data_final)
+        else:
+            print("Erro: Widgets de data não estão inicializados")
 
     def atualizar_tabela(self, agendamentos):
         self.tree_agendamentos.delete(*self.tree_agendamentos.get_children())
@@ -111,4 +120,16 @@ class TelaListaAgendamentos(ctk.CTkFrame):
         self.controller.voltar_tela_recepcionista()
 
     def esconder(self):
-        self.place_forget()
+        self.pack_forget()
+
+    def pack_forget(self):
+        super().pack_forget()
+
+    def mostrar(self):
+        self.pack(fill="both", expand=True)
+        self.master.update_idletasks()
+        if hasattr(self, 'entry_data_inicial') and self.entry_data_inicial.winfo_exists():
+            self.entry_data_inicial.focus_set()
+
+    def destruir(self):
+        self.destroy()
