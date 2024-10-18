@@ -1,11 +1,14 @@
 from model.model import PacienteModel, Paciente
-from view.view import SistemaCadastroView
+from view.tela_recepcionista import SistemaCadastroView
+from view.tela_agendamento import TelaAgendamento
 from validacao.validacoes import (validar_string, validar_cpf, validar_telefone, 
                          validar_email, validar_campos_preenchidos)
 
-class SistemaCadastroController:
-    def __init__(self, janela):
+class RecepcionistaController:
+    def __init__(self, janela, main_controller):
+        self.janela = janela
         self.model = PacienteModel()
+        self.main_controller = main_controller
         self.view = SistemaCadastroView(janela, self)
 
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email, endereco):
@@ -39,21 +42,28 @@ class SistemaCadastroController:
         self.view.mostrar_mensagem("Cadastro Concluído", "Pessoa cadastrada com sucesso!")
         self.view.limpar_campos()
 
+    def fazer_logout(self):
+        self.main_controller.fazer_logout()
 
-    def excluir_paciente(self, index):
-        paciente = self.model.obter_paciente_por_cpf()[index]
-        if self.view.confirmar_acao("Confirmar Exclusão", f"Tem certeza que deseja excluir o paciente '{paciente.nome}' do sistema?"):
-            self.model.remover_paciente(index)
+    def confirmar_acao(self, titulo, mensagem):
+        return self.view.confirmar_acao(titulo, mensagem)
+
+    def excluir_paciente(self, item):
+        valores = self.view.tabela.item(item, 'values')
+        nome = valores[0]  # O nome é o primeiro valor na tupla
+        if self.view.confirmar_acao("Confirmar Exclusão", f"Tem certeza que deseja excluir o paciente '{nome}' do sistema?"):
+            cpf = valores[1]  # O CPF é o segundo valor na tupla
+            self.model.remover_paciente_por_cpf(cpf)
             self.atualizar_tabela()
             self.view.mostrar_mensagem("Exclusão", "Paciente excluído com sucesso.")
-
+    
     def filtrar_pacientes(self, criterio):
         pacientes_filtrados = self.model.filtrar_pacientes(criterio)
         self.view.atualizar_tabela(pacientes_filtrados)
     
     def exibir_tabela_pacientes(self):
         self.view.exibir_tabela_pacientes()
-        self.atualizar_tabela()  # Chamamos atualizar_tabela após criar a tabela
+        self.atualizar_tabela()
 
     def atualizar_tabela(self):
         pacientes = self.model.obter_pacientes()  # Use este método em vez de obter_paciente_por_cpf
@@ -83,13 +93,13 @@ class SistemaCadastroController:
         for validacao, msg in validacoes:
             if not validacao:
                 self.view.mostrar_erro("Erro de Validação", msg)
-                return
+                return False
 
         # Obter o paciente original
         paciente_original = self.model.obter_paciente_por_cpf(cpf)
         if not paciente_original:
             self.view.mostrar_erro("Erro", "Paciente não encontrado.")
-            return
+            return False
 
         # Atualizar apenas os campos editáveis
         paciente_atualizado = Paciente(
@@ -102,7 +112,23 @@ class SistemaCadastroController:
         )
 
         if self.model.atualizar_paciente(cpf, paciente_atualizado):
-            self.view.mostrar_mensagem("Alteração Concluída", "Dados do paciente atualizados com sucesso!")
-            self.atualizar_tabela()
+            return True
         else:
             self.view.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
+            return False
+
+    def abrir_tela_agendamento(self):
+        self.main_controller.mostrar_tela_agendamento()
+
+    def voltar_para_recepcionista(self):
+        self.view.mostrar()
+
+    def cadastrar_paciente_da_tela_agendamento(self):
+        self.view.criar_interface_cadastro()
+        self.view.botao_voltar.configure(command=self.main_controller.voltar_para_agendamento)
+
+    def abrir_tela_lista_agendamentos(self):
+        self.main_controller.mostrar_tela_lista_agendamentos()
+
+    def voltar_tela_principal(self):
+        self.view.exibir_tela_recepcionista()

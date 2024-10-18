@@ -1,3 +1,4 @@
+import os
 import customtkinter as ctk
 from tkinter import ttk, messagebox, Menu
 from PIL import Image, ImageTk
@@ -7,7 +8,7 @@ class SistemaCadastroView:
         self.janela = janela
         self.controller = controller
         self.configurar_janela()
-        self.logo_path = "imagens/file.png"
+        self.logo_path = os.path.abspath("mvc/imagens/logo.png")
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
         self.exibir_tela_recepcionista()
 
@@ -16,13 +17,11 @@ class SistemaCadastroView:
         self.janela.geometry(f"{self.janela.winfo_screenwidth()}x{self.janela.winfo_screenheight()}+0+0")
         self.janela.resizable(True, True)
 
-    def carregar_imagem(self, caminho, tamanho, ctk_image=True):
-        """Carrega e redimensiona uma imagem."""
+    def carregar_imagem(self, caminho, tamanho):
+        """Carrega e redimensiona uma imagem usando apenas CTkImage."""
         imagem = Image.open(caminho)
         imagem = imagem.resize(tamanho, Image.LANCZOS)
-        if ctk_image:
-            return ctk.CTkImage(imagem, size=tamanho)
-        return ImageTk.PhotoImage(imagem)
+        return ctk.CTkImage(light_image=imagem, dark_image=imagem, size=tamanho)
 
     def criar_label(self, texto, linha, coluna, frame=None):
         """Cria e retorna um label em um frame específico ou no frame principal se não especificado."""
@@ -54,29 +53,53 @@ class SistemaCadastroView:
 
     def exibir_tela_recepcionista(self):
         """Tela inicial para o recepcionista com layout padrão."""
+        # Limpar a janela atual
         for widget in self.janela.winfo_children():
             widget.destroy()
 
+        # Criar um novo frame
         self.frame_recepcionista = ctk.CTkFrame(self.janela, border_width=3, border_color="#00CED1", fg_color="white")
-        self.frame_recepcionista.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.6)
+        self.frame_recepcionista.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
 
         self.frame_recepcionista.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.frame_recepcionista.grid_rowconfigure((1, 10), weight=1)
 
+        # Criar logo e título
         self.criar_logo(self.frame_recepcionista)
         self.criar_titulo("Área do Recepcionista", self.frame_recepcionista)
 
+        # Botões
         self.botao_cadastro = ctk.CTkButton(self.frame_recepcionista, text="Cadastrar Paciente", 
-                                            font=("Arial", 18, "bold"), width=200, height=40, command=self.criar_interface_cadastro)
+                                            font=("Arial", 18, "bold"), width=200, height=40, 
+                                            command=self.criar_interface_cadastro)
         self.botao_cadastro.grid(row=3, column=1, padx=20, pady=20, sticky="e")
 
         self.botao_mostrar_tabela = ctk.CTkButton(self.frame_recepcionista, text="Consultar Paciente", 
-                                                font=("Arial", 18, "bold"), width=200, height=40, command=self.exibir_tabela_pacientes)
+                                                font=("Arial", 18, "bold"), width=200, height=40, 
+                                                command=self.exibir_tabela_pacientes)
         self.botao_mostrar_tabela.grid(row=3, column=2, padx=20, pady=20, sticky="w")
 
         self.botao_sair = ctk.CTkButton(self.frame_recepcionista, text="Sair", 
-                                        font=("Arial", 16, "bold"), width=100, height=30, command=self.janela.quit)
+                                        font=("Arial", 16, "bold"), width=100, height=30, 
+                                        command=self.fazer_logout)
         self.botao_sair.grid(row=5, column=1, columnspan=2, padx=(5, 5), pady=10)
+
+        self.botao_agendar = ctk.CTkButton(self.frame_recepcionista, text="Agendar Consulta", 
+                                           font=("Arial", 18, "bold"), width=200, height=40, 
+                                           command=self.controller.abrir_tela_agendamento)
+        self.botao_agendar.grid(row=4, column=1, padx=20, pady=20, sticky="e")
+
+        self.botao_listar_agendamentos = ctk.CTkButton(self.frame_recepcionista, text="Listar Agendamentos", 
+                                                       font=("Arial", 18, "bold"), width=200, height=40, 
+                                                       command=self.controller.abrir_tela_lista_agendamentos)
+        self.botao_listar_agendamentos.grid(row=4, column=2, padx=20, pady=20, sticky="w")
+
+        # Atualizar a janela
+        self.janela.update()
+
+    def fazer_logout(self):
+        if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):
+            self.controller.fazer_logout()
 
     def criar_interface_cadastro(self):
         for widget in self.janela.winfo_children():
@@ -88,12 +111,15 @@ class SistemaCadastroView:
         self.frame.grid_columnconfigure((0, 3), weight=1)
         self.frame.grid_columnconfigure((1, 2), weight=0)
 
+        # Recarregar a imagem da logo antes de criar os widgets
+        self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
+
         self.criar_widgets_formulario()
 
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), width=200, height=30, command=self.enviar_cadastro)
         self.botao_cadastrar.grid(row=9, column=1, padx=(5, 5), pady=20, sticky="e")
 
-        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar para Tela Principal", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tela_recepcionista)
+        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar para Tela Principal", font=("Arial", 14, "bold"), width=200, height=30, command=self.voltar_tela_principal)
         self.botao_voltar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
     def criar_widgets_formulario(self, valores=None, modo_edicao=False):
@@ -109,13 +135,16 @@ class SistemaCadastroView:
         
         self.criar_label("CPF:", 2, 2)
         self.entry_cpf = self.criar_entry(3, 2, "XXX.XXX.XXX-XX")
+        self.entry_cpf.bind("<KeyRelease>", self.formatar_cpf)
         
         self.criar_label("Data de Nascimento:", 4, 1)
         self.entry_datanasc = self.criar_entry(5, 1, "DD/MM/AAAA")
+        self.entry_datanasc.bind("<KeyRelease>", self.formatar_data_nascimento)
 
         # Telefone, Email e Endereço (sempre editáveis)
         self.criar_label("Telefone:", 4, 2)
         self.entry_telefone = self.criar_entry(5, 2, "(DDD) 91234-5678")
+        self.entry_telefone.bind("<KeyRelease>", self.formatar_telefone)
 
         self.criar_label("Email:", 6, 1)
         self.entry_email = self.criar_entry(7, 1, "exemplo@dominio.com")
@@ -130,6 +159,48 @@ class SistemaCadastroView:
             self.entry_nome.configure(state="readonly")
             self.entry_cpf.configure(state="readonly")
             self.entry_datanasc.configure(state="readonly")
+
+    def formatar_cpf(self, event):
+        cpf = self.entry_cpf.get()
+        cpf = ''.join(filter(str.isdigit, cpf))
+        cpf = cpf[:11]  # Limita a 11 dígitos
+        
+        cpf_formatado = ''
+        for i, digit in enumerate(cpf):
+            if i == 3 or i == 6:
+                cpf_formatado += '.'
+            elif i == 9:
+                cpf_formatado += '-'
+            cpf_formatado += digit
+        
+        self.entry_cpf.delete(0, ctk.END)
+        self.entry_cpf.insert(0, cpf_formatado)
+
+    def formatar_telefone(self, event):
+        telefone = self.entry_telefone.get()
+        telefone = ''.join(filter(str.isdigit, telefone))
+        telefone = telefone[:11]  # Limita a 11 dígitos
+        
+        if len(telefone) > 2:
+            telefone = f"({telefone[:2]}) {telefone[2:]}"
+        if len(telefone) > 10:
+            telefone = f"{telefone[:10]}-{telefone[10:]}"
+        
+        self.entry_telefone.delete(0, ctk.END)
+        self.entry_telefone.insert(0, telefone)
+
+    def formatar_data_nascimento(self, event):
+        data = self.entry_datanasc.get()
+        data = ''.join(filter(str.isdigit, data))
+        data = data[:8]  # Limita a 8 dígitos
+        
+        if len(data) > 2:
+            data = f"{data[:2]}/{data[2:]}"
+        if len(data) > 5:
+            data = f"{data[:5]}/{data[5:]}"
+        
+        self.entry_datanasc.delete(0, ctk.END)
+        self.entry_datanasc.insert(0, data)
 
     def preencher_campos(self, valores):
         self.entry_nome.delete(0, 'end')
@@ -154,29 +225,37 @@ class SistemaCadastroView:
         for widget in self.janela.winfo_children():
             widget.destroy()
         
-        self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="white")
-        self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.8, relheight=0.8)
+        self.janela.grid_columnconfigure(0, weight=1)
+        self.janela.grid_rowconfigure(2, weight=1)
+
+        # Título
+        self.label_titulo = ctk.CTkLabel(self.janela, text="Lista de Pacientes", font=("Arial", 24, "bold"))
+        self.label_titulo.grid(row=0, column=0, pady=20, sticky="ew")
+
+        # Frame para filtros
+        self.frame_filtros = ctk.CTkFrame(self.janela)
+        self.frame_filtros.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+
+        self.entry_pesquisa = ctk.CTkEntry(self.frame_filtros, placeholder_text="Digite o nome ou CPF", width=250, font=("Arial", 14))
+        self.entry_pesquisa.pack(side="left", padx=5, pady=5)
+
+        botao_pesquisar = ctk.CTkButton(self.frame_filtros, text="Pesquisar", font=("Arial", 14, "bold"), command=self.realizar_pesquisa)
+        botao_pesquisar.pack(side="left", padx=5, pady=5)
+
+        # Tabela
+        colunas = ("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço")
+        self.tabela = ttk.Treeview(self.janela, columns=colunas, show="headings")
         
-        self.tabela_frame.grid_columnconfigure(0, weight=1)
-        self.tabela_frame.grid_rowconfigure(1, weight=1)
-
-        self.entry_pesquisa = ctk.CTkEntry(self.tabela_frame, placeholder_text="Digite o nome ou CPF", width=150, font=("Arial", 14))
-        self.entry_pesquisa.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
-
-        botao_pesquisar = ctk.CTkButton(self.tabela_frame, text="Pesquisar", font=("Arial", 14, "bold"), command=self.realizar_pesquisa)
-        botao_pesquisar.grid(row=0, column=2, padx=10, pady=10)
-
-        self.tabela = ttk.Treeview(self.tabela_frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
-
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Arial", 14, "bold"))
+        style.configure("Treeview", font=("Arial", 12))
 
-        for col in self.tabela["columns"]:
-            self.tabela.heading(col, text=col)
+        for col in colunas:
+            self.tabela.heading(col, text=col, anchor="center")
             self.tabela.column(col, anchor="center", width=150)
 
-        self.tabela.column("Nome", width=250)
-        self.tabela.column("Email", width=250)
+        self.tabela.column("Nome", width=200)
+        self.tabela.column("Email", width=200)
         self.tabela.column("Endereço", width=300)
 
         self.tabela.tag_configure('evenrow', background='#E8E8E8')
@@ -184,18 +263,23 @@ class SistemaCadastroView:
 
         self.tabela.bind("<Button-3>", self.mostrar_menu_contexto)
 
-        self.tabela.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.tabela.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
 
-        scrollbar_y = ttk.Scrollbar(self.tabela_frame, orient="vertical", command=self.tabela.yview)
-        scrollbar_y.grid(row=1, column=3, sticky="ns")
+        # Scrollbars
+        scrollbar_y = ttk.Scrollbar(self.janela, orient="vertical", command=self.tabela.yview)
+        scrollbar_y.grid(row=2, column=1, sticky="ns")
 
-        scrollbar_x = ttk.Scrollbar(self.tabela_frame, orient="horizontal", command=self.tabela.xview)
-        scrollbar_x.grid(row=2, column=0, columnspan=3, sticky="ew")
+        scrollbar_x = ttk.Scrollbar(self.janela, orient="horizontal", command=self.tabela.xview)
+        scrollbar_x.grid(row=3, column=0, sticky="ew")
 
         self.tabela.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
 
-        self.botao_voltar = ctk.CTkButton(self.tabela_frame, text="Voltar á tela inicial",  font=("Arial", 14, "bold"), command=self.exibir_tela_recepcionista)
-        self.botao_voltar.grid(row=3, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+        # Frame para botões
+        self.frame_acoes = ctk.CTkFrame(self.janela)
+        self.frame_acoes.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+
+        self.botao_voltar = ctk.CTkButton(self.frame_acoes, text="Voltar", font=("Arial", 16, "bold"), width=150, height=40, command=self.exibir_tela_recepcionista)
+        self.botao_voltar.pack(side="right", padx=5)
 
         # Após criar a tabela, chamamos o controlador para atualizá-la
         self.controller.atualizar_tabela()
@@ -235,11 +319,14 @@ class SistemaCadastroView:
         self.botao_cancelar = ctk.CTkButton(self.frame, text="Cancelar", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tabela_pacientes)
         self.botao_cancelar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
-
     def salvar_alteracoes(self, item):
         dados = self.obter_dados_formulario()
-        self.controller.alterar_paciente(item, **dados)
-        self.exibir_tabela_pacientes()
+        if self.controller.alterar_paciente(item, **dados):
+            self.mostrar_mensagem("Sucesso", "Paciente atualizado com sucesso!")
+            self.fechar_janela_alteracao()
+            self.controller.exibir_tabela_pacientes()  # Chama o método do controlador para exibir a tabela
+        else:
+            self.mostrar_erro("Erro", "Não foi possível atualizar o paciente.")
 
     def iniciar_alteracao(self, item):
         # Obter os dados do item selecionado
@@ -248,8 +335,9 @@ class SistemaCadastroView:
         self.controller.iniciar_alteracao_paciente(item, valores)
 
     def atualizar_tabela(self, pacientes):
-        if not hasattr(self, 'tabela'):
-            # Se a tabela ainda não foi criada, não fazemos nada
+        if not hasattr(self, 'tabela') or not self.tabela.winfo_exists():
+            # Se a tabela não existe ou foi destruída, recriamos a interface
+            self.exibir_tabela_pacientes()
             return
 
         for item in self.tabela.get_children():
@@ -265,6 +353,13 @@ class SistemaCadastroView:
                 paciente.email,
                 paciente.endereco
         ), tags=(tag,))
+        
+    def fechar_janela_alteracao(self):
+        # Destruir o frame de alteração
+        if hasattr(self, 'frame'):
+            self.frame.destroy()
+        # Exibir novamente a tabela de pacientes
+        self.exibir_tabela_pacientes()
 
     def mostrar_mensagem(self, titulo, mensagem):
         messagebox.showinfo(titulo, mensagem)
@@ -292,3 +387,9 @@ class SistemaCadastroView:
     def limpar_campos(self):
         for entry in [self.entry_nome, self.entry_cpf, self.entry_datanasc, self.entry_telefone, self.entry_email, self.entry_endereco]:
             entry.delete(0, ctk.END)
+
+    def voltar_tela_principal(self):
+        self.controller.voltar_tela_principal()
+
+    def mostrar(self):
+        self.exibir_tela_recepcionista()
