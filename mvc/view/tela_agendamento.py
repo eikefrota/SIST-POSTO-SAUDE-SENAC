@@ -33,20 +33,27 @@ class TelaAgendamento:
         self.frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.frame.grid_rowconfigure((0, 11), weight=1)
 
+        # Header com logo e título
+        self.criar_header()
+
         self.criar_widgets_agendamento()
 
     def criar_widgets_agendamento(self):
-        # Logo e título
-        self.criar_logo()
-        self.criar_titulo("Agendamento de Consultas")
+
+        # Campo de pesquisa
+        # Criar um frame para agrupar o entry e o botão
+        frame_pesquisa = ctk.CTkFrame(self.frame, fg_color="transparent")
+        frame_pesquisa.grid(row=2, column=2, padx=(20, 0), pady=(10, 5), sticky="w")
 
         # Campo de pesquisa
         self.criar_label("Pesquisar Paciente (CPF):", 2, 1, sticky="e")
-        self.entry_pesquisa = ctk.CTkEntry(self.frame, placeholder_text="Digite o CPF", width=250, height=30, font=("Arial", 14))
-        self.entry_pesquisa.grid(row=2, column=2, padx=(20, 0), pady=(10, 5), sticky="w")
+        self.entry_pesquisa = ctk.CTkEntry(frame_pesquisa, placeholder_text="Digite o CPF", width=250, height=30, font=("Arial", 14))
+        self.entry_pesquisa.pack(side="left", padx=(0, 10))
         self.entry_pesquisa.bind("<KeyRelease>", self.formatar_cpf_ou_texto)
-        self.botao_pesquisar = ctk.CTkButton(self.frame, text="Pesquisar", font=("Arial", 14, "bold"), width=100, height=30, command=self.pesquisar_paciente)
-        self.botao_pesquisar.grid(row=2, column=2, padx=(325, 0), pady=(10, 5), sticky="w")
+
+        # Botão pesquisar
+        self.botao_pesquisar = ctk.CTkButton(frame_pesquisa, text="Pesquisar", font=("Arial", 14, "bold"), width=100, height=30, command=self.pesquisar_paciente)
+        self.botao_pesquisar.pack(side="left")
 
         # Paciente
         self.criar_label("Paciente:", 3, 1, sticky="e")
@@ -76,16 +83,29 @@ class TelaAgendamento:
         botoes_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
         botoes_frame.grid(row=8, column=1, columnspan=2, pady=20)
 
-        self.botao_agendar = ctk.CTkButton(botoes_frame, text="Agendar Consulta", font=("Arial", 18, "bold"), width=250, height=50, command=self.agendar_consulta)
+        self.botao_agendar = ctk.CTkButton(botoes_frame, text="Agendar Consulta", font=("Arial", 18, "bold"), width=200, height=40, command=self.agendar_consulta)
         self.botao_agendar.grid(row=0, column=0, padx=(0, 10))
 
-        self.botao_cadastrar_paciente = ctk.CTkButton(botoes_frame, text="Cadastrar Novo Paciente", font=("Arial", 18, "bold"), width=250, height=50, command=self.abrir_cadastro_paciente)
+        self.botao_cadastrar_paciente = ctk.CTkButton(botoes_frame, text="Cadastrar Novo Paciente", font=("Arial", 18, "bold"), width=200, height=40, command=self.abrir_cadastro_paciente)
         self.botao_cadastrar_paciente.grid(row=0, column=1, padx=(10, 0))
 
-        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar", font=("Arial", 18, "bold"), width=250, height=50, command=self.voltar_tela_recepcionista)
+        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar", font=("Arial", 18, "bold"), width=200, height=40, command=self.voltar_tela_recepcionista)
         self.botao_voltar.grid(row=9, column=1, columnspan=2, pady=20)
 
         self.carregar_dados()
+
+    def criar_header(self):
+        header_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
+        header_frame.grid(row=1, column=1, columnspan=2, pady=(10, 20), sticky="ew")
+        header_frame.grid_columnconfigure(1, weight=1)
+
+        # Logo
+        self.label_logo = ctk.CTkLabel(header_frame, image=self.logo_image, text="")
+        self.label_logo.grid(row=0, column=0, padx=(0, 0), pady=(10, 5), sticky="w")
+
+        # Título
+        self.label_titulo = ctk.CTkLabel(header_frame, text="Agendamento de Consultas", font=("Montserrat", 20, "bold"))
+        self.label_titulo.grid(row=0, column=1, padx=(0, 0), pady=(10, 5), sticky="w")
 
     def criar_label(self, texto, linha, coluna, sticky="w"):
         label = ctk.CTkLabel(self.frame, text=texto, font=("Arial", 16, "bold"))
@@ -98,7 +118,7 @@ class TelaAgendamento:
 
     def criar_titulo(self, texto):
         self.label_titulo = ctk.CTkLabel(self.frame, text=texto, font=("Montserrat", 20, "bold"))
-        self.label_titulo.grid(row=1, column=1, columnspan=2, padx=(20, 0), pady=(10, 5), sticky="e")
+        self.label_titulo.grid(row=1, column=1, padx=(20, 0), pady=(10, 5), sticky="e")
 
     def formatar_hora(self, event):
         hora = self.entry_hora.get()

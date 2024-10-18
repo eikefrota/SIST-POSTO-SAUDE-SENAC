@@ -6,7 +6,6 @@ from controller.agendamento_controller import AgendamentoController
 from view.tela_login import TelaLogin
 from model.model import UsuarioModel
 from tkinter import messagebox
-from view.tabela_agendamentos import TelaListaAgendamentos
 import tkinter.ttk as ttk
 from view.tela_prontuario import TelaProntuario
 

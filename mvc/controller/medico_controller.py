@@ -38,9 +38,9 @@ class MedicoController:
         consulta_id = paciente[0]  # Assumindo que o ID da consulta é o primeiro item
         if self.consulta_model.atualizar_status_consulta(consulta_id, "Atendido"):
             self.view.atualizar_tabela_pacientes(self.listar_consultas_do_dia())
-            self.view.mostrar_mensagem("Sucesso", "Paciente atendido com sucesso!")
+            self.mostrar_mensagem("Sucesso", "Paciente atendido com sucesso!")
         else:
-            self.view.mostrar_erro("Erro", "Não foi possível atualizar o status da consulta.")
+            self.mostrar_erro("Erro", "Não foi possível atualizar o status da consulta.")
 
     def abrir_tela_prontuario(self, cpf):
         paciente = self.paciente_model.obter_paciente_por_cpf(cpf)
@@ -86,3 +86,6 @@ class MedicoController:
 
     def voltar_tela_principal(self):
         self.main_controller.voltar_para_tela_principal()
+
+    def mostrar_mensagem(self, titulo, mensagem):
+        messagebox.showinfo(titulo, mensagem)

@@ -42,7 +42,7 @@ class TelaProntuario:
         titulo.grid(row=0, column=1, sticky="w")
 
         # Data de Nascimento
-        data_nasc = ctk.CTkLabel(header_frame, text=f"Data de Nascimento: {self.paciente.data_nascimento}", font=("Arial", 16))
+        data_nasc = ctk.CTkLabel(header_frame, text=f"Data de Nascimento: {self.paciente.data_nascimento}", font=("Arial", 16, "bold"))
         data_nasc.grid(row=0, column=2, sticky="e", padx=(0, 20))
 
         # Histórico

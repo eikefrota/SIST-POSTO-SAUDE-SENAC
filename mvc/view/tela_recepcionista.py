@@ -95,7 +95,7 @@ class SistemaCadastroView:
         self.botao_listar_agendamentos.grid(row=4, column=2, padx=20, pady=20, sticky="w")
 
         # Atualizar a janela
-        self.janela.update_idletasks()
+        self.janela.update()
 
     def fazer_logout(self):
         if self.controller.confirmar_acao("Confirmar Logout", "Tem certeza que deseja sair?"):
@@ -225,29 +225,37 @@ class SistemaCadastroView:
         for widget in self.janela.winfo_children():
             widget.destroy()
         
-        self.tabela_frame = ctk.CTkFrame(self.janela, fg_color="white")
-        self.tabela_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.8, relheight=0.8)
+        self.janela.grid_columnconfigure(0, weight=1)
+        self.janela.grid_rowconfigure(2, weight=1)
+
+        # Título
+        self.label_titulo = ctk.CTkLabel(self.janela, text="Lista de Pacientes", font=("Arial", 24, "bold"))
+        self.label_titulo.grid(row=0, column=0, pady=20, sticky="ew")
+
+        # Frame para filtros
+        self.frame_filtros = ctk.CTkFrame(self.janela)
+        self.frame_filtros.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+
+        self.entry_pesquisa = ctk.CTkEntry(self.frame_filtros, placeholder_text="Digite o nome ou CPF", width=250, font=("Arial", 14))
+        self.entry_pesquisa.pack(side="left", padx=5, pady=5)
+
+        botao_pesquisar = ctk.CTkButton(self.frame_filtros, text="Pesquisar", font=("Arial", 14, "bold"), command=self.realizar_pesquisa)
+        botao_pesquisar.pack(side="left", padx=5, pady=5)
+
+        # Tabela
+        colunas = ("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço")
+        self.tabela = ttk.Treeview(self.janela, columns=colunas, show="headings")
         
-        self.tabela_frame.grid_columnconfigure(0, weight=1)
-        self.tabela_frame.grid_rowconfigure(1, weight=1)
-
-        self.entry_pesquisa = ctk.CTkEntry(self.tabela_frame, placeholder_text="Digite o nome ou CPF", width=150, font=("Arial", 14))
-        self.entry_pesquisa.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
-
-        botao_pesquisar = ctk.CTkButton(self.tabela_frame, text="Pesquisar", font=("Arial", 14, "bold"), command=self.realizar_pesquisa)
-        botao_pesquisar.grid(row=0, column=2, padx=10, pady=10)
-
-        self.tabela = ttk.Treeview(self.tabela_frame, columns=("Nome", "CPF", "Data de Nascimento", "Telefone", "Email", "Endereço"), show="headings")
-
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Arial", 14, "bold"))
+        style.configure("Treeview", font=("Arial", 12))
 
-        for col in self.tabela["columns"]:
-            self.tabela.heading(col, text=col)
+        for col in colunas:
+            self.tabela.heading(col, text=col, anchor="center")
             self.tabela.column(col, anchor="center", width=150)
 
-        self.tabela.column("Nome", width=250)
-        self.tabela.column("Email", width=250)
+        self.tabela.column("Nome", width=200)
+        self.tabela.column("Email", width=200)
         self.tabela.column("Endereço", width=300)
 
         self.tabela.tag_configure('evenrow', background='#E8E8E8')
@@ -255,18 +263,23 @@ class SistemaCadastroView:
 
         self.tabela.bind("<Button-3>", self.mostrar_menu_contexto)
 
-        self.tabela.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.tabela.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
 
-        scrollbar_y = ttk.Scrollbar(self.tabela_frame, orient="vertical", command=self.tabela.yview)
-        scrollbar_y.grid(row=1, column=3, sticky="ns")
+        # Scrollbars
+        scrollbar_y = ttk.Scrollbar(self.janela, orient="vertical", command=self.tabela.yview)
+        scrollbar_y.grid(row=2, column=1, sticky="ns")
 
-        scrollbar_x = ttk.Scrollbar(self.tabela_frame, orient="horizontal", command=self.tabela.xview)
-        scrollbar_x.grid(row=2, column=0, columnspan=3, sticky="ew")
+        scrollbar_x = ttk.Scrollbar(self.janela, orient="horizontal", command=self.tabela.xview)
+        scrollbar_x.grid(row=3, column=0, sticky="ew")
 
         self.tabela.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
 
-        self.botao_voltar = ctk.CTkButton(self.tabela_frame, text="Voltar á tela inicial",  font=("Arial", 14, "bold"), command=self.exibir_tela_recepcionista)
-        self.botao_voltar.grid(row=3, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+        # Frame para botões
+        self.frame_acoes = ctk.CTkFrame(self.janela)
+        self.frame_acoes.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+
+        self.botao_voltar = ctk.CTkButton(self.frame_acoes, text="Voltar", font=("Arial", 16, "bold"), width=150, height=40, command=self.exibir_tela_recepcionista)
+        self.botao_voltar.pack(side="right", padx=5)
 
         # Após criar a tabela, chamamos o controlador para atualizá-la
         self.controller.atualizar_tabela()
