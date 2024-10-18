@@ -2,6 +2,7 @@ from model.model import ConsultaModel, UsuarioModel, PacienteModel
 from view.tela_agendamento import TelaAgendamento
 from view.tabela_agendamentos import TelaListaAgendamentos
 from tkinter import messagebox
+from view.tela_recepcionista import SistemaCadastroView
 
 class AgendamentoController:
     def __init__(self, janela, main_controller):
@@ -79,3 +80,11 @@ class AgendamentoController:
 
     def pesquisar_pacientes(self, termo_pesquisa):
         return self.paciente_model.pesquisar_pacientes(termo_pesquisa)
+
+    def abrir_cadastro_paciente(self):
+        self.view.esconder()
+        self.main_controller.recepcionista_controller.cadastrar_paciente_da_tela_agendamento()
+
+    def voltar_para_recepcionista(self):
+        self.view.esconder()
+        self.main_controller.mostrar_tela_recepcionista()

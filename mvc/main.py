@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from controller.recepcionista_controller import SistemaCadastroController
+from controller.recepcionista_controller import RecepcionistaController
 from controller.medico_controller import MedicoController
 from controller.admin_controller import AdminController
 from controller.agendamento_controller import AgendamentoController
@@ -13,6 +13,8 @@ class MainController:
         self.janela = ctk.CTk()
         self.usuario_model = UsuarioModel()
         self.tela_login = TelaLogin(self.janela, self)
+        self.recepcionista_controller = None
+        self.agendamento_controller = None
 
     def verificar_login(self, cpf, senha):
         return self.usuario_model.verificar_credenciais(cpf, senha)
@@ -37,15 +39,16 @@ class MainController:
         medico_controller.iniciar()
 
     def mostrar_tela_recepcionista(self):
-        for widget in self.janela.winfo_children():
-            widget.destroy()
-        self.tela_recepcionista = SistemaCadastroController(self.janela, self)
+        self.limpar_janela()
+        if not self.recepcionista_controller:
+            self.recepcionista_controller = RecepcionistaController(self.janela, self)
+        self.recepcionista_controller.view.mostrar()
 
     def mostrar_tela_agendamento(self):
-        for widget in self.janela.winfo_children():
-            widget.destroy()
-        agendamento_controller = AgendamentoController(self.janela, self)
-        agendamento_controller.iniciar()
+        self.limpar_janela()
+        if not self.agendamento_controller:
+            self.agendamento_controller = AgendamentoController(self.janela, self)
+        self.agendamento_controller.iniciar()
 
     def mostrar_tela_login(self):
         for widget in self.janela.winfo_children():
@@ -66,14 +69,16 @@ class MainController:
         messagebox.showerror(titulo, mensagem)
 
     def mostrar_tela_lista_agendamentos(self):
+        if self.agendamento_controller:
+            self.agendamento_controller.abrir_tela_lista_agendamentos()
+
+    def voltar_para_agendamento(self):
+        if self.agendamento_controller:
+            self.agendamento_controller.view.mostrar()
+
+    def limpar_janela(self):
         for widget in self.janela.winfo_children():
             widget.destroy()
-        agendamento_controller = AgendamentoController(self.janela, self)
-        tela_lista_agendamentos = TelaListaAgendamentos(self.janela, agendamento_controller)
-        tela_lista_agendamentos.pack(fill="both", expand=True)
-
-    def voltar_para_recepcionista(self):
-        self.mostrar_tela_recepcionista()
 
 if __name__ == "__main__":
     app = MainController()

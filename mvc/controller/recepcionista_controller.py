@@ -1,9 +1,10 @@
 from model.model import PacienteModel, Paciente
 from view.tela_recepcionista import SistemaCadastroView
+from view.tela_agendamento import TelaAgendamento
 from validacao.validacoes import (validar_string, validar_cpf, validar_telefone, 
                          validar_email, validar_campos_preenchidos)
 
-class SistemaCadastroController:
+class RecepcionistaController:
     def __init__(self, janela, main_controller):
         self.janela = janela
         self.model = PacienteModel()
@@ -119,7 +120,15 @@ class SistemaCadastroController:
     def abrir_tela_agendamento(self):
         self.main_controller.mostrar_tela_agendamento()
 
+    def voltar_para_recepcionista(self):
+        self.view.mostrar()
+
+    def cadastrar_paciente_da_tela_agendamento(self):
+        self.view.criar_interface_cadastro()
+        self.view.botao_voltar.configure(command=self.main_controller.voltar_para_agendamento)
+
     def abrir_tela_lista_agendamentos(self):
         self.main_controller.mostrar_tela_lista_agendamentos()
 
-    
+    def voltar_tela_principal(self):
+        self.view.exibir_tela_recepcionista()

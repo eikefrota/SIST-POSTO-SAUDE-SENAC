@@ -80,6 +80,10 @@ class TelaAgendamento:
         self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar", font=("Arial", 18, "bold"), width=200, height=40, command=self.voltar_tela_recepcionista)
         self.botao_voltar.grid(row=8, column=2, padx=20, pady=20)
 
+        # Adicione este novo botão após os outros botões
+        self.botao_cadastrar_paciente = ctk.CTkButton(self.frame, text="Cadastrar Novo Paciente", font=("Arial", 18, "bold"), width=200, height=40, command=self.abrir_cadastro_paciente)
+        self.botao_cadastrar_paciente.grid(row=9, column=1, columnspan=2, padx=20, pady=20)
+
         self.carregar_dados()
 
     def criar_label(self, texto, linha, coluna, sticky="w"):
@@ -144,17 +148,25 @@ class TelaAgendamento:
             self.controller.mostrar_erro("Erro", "Não foi possível agendar a consulta.")
 
     def limpar_campos(self):
-        self.entry_pesquisa.delete(0, ctk.END)
-        self.combo_paciente.set('')
-        self.combo_medico.set('')
-        self.entry_data.set_date(datetime.now().strftime("%d/%m/%Y"))
-        self.entry_hora.delete(0, ctk.END)
+        if hasattr(self, 'entry_pesquisa') and self.entry_pesquisa.winfo_exists():
+            self.entry_pesquisa.delete(0, ctk.END)
+        if hasattr(self, 'combo_paciente') and self.combo_paciente.winfo_exists():
+            self.combo_paciente.set('')
+        if hasattr(self, 'combo_medico') and self.combo_medico.winfo_exists():
+            self.combo_medico.set('')
+        if hasattr(self, 'entry_data') and self.entry_data.winfo_exists():
+            self.entry_data.set_date(datetime.now().strftime("%d/%m/%Y"))
+        if hasattr(self, 'entry_hora') and self.entry_hora.winfo_exists():
+            self.entry_hora.delete(0, ctk.END)
 
     def voltar_tela_recepcionista(self):
         self.controller.voltar_tela_recepcionista()
 
     def mostrar(self):
-        self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
+        if not hasattr(self, 'frame') or not self.frame.winfo_exists():
+            self.criar_interface_agendamento()
+        else:
+            self.frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=0.6, relheight=0.7)
 
     def esconder(self):
         self.frame.place_forget()
@@ -195,3 +207,6 @@ class TelaAgendamento:
             return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:]}"
         else:
             return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
+
+    def abrir_cadastro_paciente(self):
+        self.controller.abrir_cadastro_paciente()

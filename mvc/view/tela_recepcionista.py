@@ -119,7 +119,7 @@ class SistemaCadastroView:
         self.botao_cadastrar = ctk.CTkButton(self.frame, text="Cadastrar", font=("Arial", 14, "bold"), width=200, height=30, command=self.enviar_cadastro)
         self.botao_cadastrar.grid(row=9, column=1, padx=(5, 5), pady=20, sticky="e")
 
-        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar para Tela Principal", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tela_recepcionista)
+        self.botao_voltar = ctk.CTkButton(self.frame, text="Voltar para Tela Principal", font=("Arial", 14, "bold"), width=200, height=30, command=self.voltar_tela_principal)
         self.botao_voltar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
     def criar_widgets_formulario(self, valores=None, modo_edicao=False):
@@ -302,7 +302,7 @@ class SistemaCadastroView:
         self.botao_salvar = ctk.CTkButton(self.frame, text="Salvar Alterações", font=("Arial", 14, "bold"), width=200, height=30, command=lambda: self.salvar_alteracoes(item))
         self.botao_salvar.grid(row=9, column=1, padx=(5, 5), pady=20, sticky="e")
 
-        # Bot��o para cancelar
+        # Botão para cancelar
         self.botao_cancelar = ctk.CTkButton(self.frame, text="Cancelar", font=("Arial", 14, "bold"), width=200, height=30, command=self.exibir_tabela_pacientes)
         self.botao_cancelar.grid(row=9, column=2, padx=(5,5), pady=20, sticky="w")
 
@@ -375,4 +375,8 @@ class SistemaCadastroView:
         for entry in [self.entry_nome, self.entry_cpf, self.entry_datanasc, self.entry_telefone, self.entry_email, self.entry_endereco]:
             entry.delete(0, ctk.END)
 
- 
+    def voltar_tela_principal(self):
+        self.controller.voltar_tela_principal()
+
+    def mostrar(self):
+        self.exibir_tela_recepcionista()
