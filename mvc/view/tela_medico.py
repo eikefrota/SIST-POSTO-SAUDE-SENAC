@@ -73,12 +73,21 @@ class TelaMedico:
         frame_tabela.grid_columnconfigure(0, weight=1)
         frame_tabela.grid_rowconfigure(0, weight=1)
 
-        colunas = ('Nome', 'CPF', 'Data', 'Hora', 'Status')
+        colunas = ('ID', 'Nome', 'CPF', 'Data', 'Hora', 'Status')
         self.tabela_pacientes = ttk.Treeview(frame_tabela, columns=colunas, show='headings')
 
+        # Configurar estilo para a tabela
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+        style.map('Treeview', background=[('selected', '#347083')])
+        style.configure("Treeview.Heading", font=('Arial', 10, 'bold'))
+
         for col in colunas:
-            self.tabela_pacientes.heading(col, text=col)
-            self.tabela_pacientes.column(col, width=100)
+            self.tabela_pacientes.heading(col, text=col, anchor='center')
+            self.tabela_pacientes.column(col, width=100, anchor='center')
+
+        self.tabela_pacientes.column('ID', width=50)
 
         self.tabela_pacientes.grid(row=0, column=0, sticky="nsew")
 
@@ -86,6 +95,10 @@ class TelaMedico:
         scrollbar = ttk.Scrollbar(frame_tabela, orient="vertical", command=self.tabela_pacientes.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.tabela_pacientes.configure(yscrollcommand=scrollbar.set)
+
+        # Configurar tags para alternar cores das linhas
+        self.tabela_pacientes.tag_configure('oddrow', background="white")
+        self.tabela_pacientes.tag_configure('evenrow', background="#f0f0f0")
 
     def criar_botoes_acoes(self):
         frame_botoes = ctk.CTkFrame(self.frame, fg_color="transparent")
@@ -110,15 +123,24 @@ class TelaMedico:
 
     def atualizar_tabela_pacientes(self, pacientes):
         self.tabela_pacientes.delete(*self.tabela_pacientes.get_children())
-        for paciente in pacientes:
-            self.tabela_pacientes.insert('', 'end', values=(paciente['nome'], paciente['cpf'], paciente['data'], paciente['hora'], paciente['status']))
+        for i, paciente in enumerate(pacientes):
+            tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+            self.tabela_pacientes.insert('', 'end', values=(
+                paciente['id'],
+                paciente['nome'],
+                paciente['cpf'],
+                paciente['data'],
+                paciente['hora'],
+                paciente['status']
+            ), tags=(tag,))
 
     def atender_paciente(self):
         selecao = self.tabela_pacientes.selection()
         if selecao:
             item = self.tabela_pacientes.item(selecao[0])
             paciente = item['values']
-            self.controller.atender_paciente(paciente)
+            consulta_id = paciente[0]  # O ID da consulta é o primeiro item
+            self.controller.atender_paciente(consulta_id)
         else:
             self.controller.mostrar_erro("Erro", "Por favor, selecione um paciente para atender.")
 

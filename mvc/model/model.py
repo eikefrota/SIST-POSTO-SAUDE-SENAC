@@ -296,5 +296,8 @@ class ConsultaModel:
             return True
         return False
 
+    def obter_consulta_por_id(self, consulta_id):
+        return self.session.query(Consulta).get(consulta_id)
+
 # Cria as tabelas no banco de dados
 db_manager.create_tables()

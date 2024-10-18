@@ -34,24 +34,23 @@ class MedicoController:
         # Implementar a lógica de seleção de paciente
         pass
 
-    def atender_paciente(self, paciente):
-        consulta_id = paciente[0]  # Assumindo que o ID da consulta é o primeiro item
-        if self.consulta_model.atualizar_status_consulta(consulta_id, "Atendido"):
-            self.view.atualizar_tabela_pacientes(self.listar_consultas_do_dia())
-            self.mostrar_mensagem("Sucesso", "Paciente atendido com sucesso!")
+    def atender_paciente(self, consulta_id):
+        consulta = self.consulta_model.obter_consulta_por_id(consulta_id)
+        if consulta and consulta.paciente:
+            self.abrir_tela_prontuario(consulta.paciente.cpf, consulta_id)
         else:
-            self.mostrar_erro("Erro", "Não foi possível atualizar o status da consulta.")
+            self.mostrar_erro("Erro", "Não foi possível abrir o prontuário do paciente.")
 
-    def abrir_tela_prontuario(self, cpf):
+    def abrir_tela_prontuario(self, cpf, consulta_id):
         paciente = self.paciente_model.obter_paciente_por_cpf(cpf)
         prontuario = self.prontuario_model.obter_prontuario_por_cpf(cpf)
         self.view.esconder()
-        self.tela_prontuario = TelaProntuario(self.janela, self, paciente, prontuario)
+        self.tela_prontuario = TelaProntuario(self.janela, self, paciente, prontuario, consulta_id)
         self.tela_prontuario.mostrar()
 
-    def salvar_prontuario(self, cpf, dados_prontuario):
+    def salvar_prontuario(self, cpf, dados_prontuario, consulta_id):
         if self.prontuario_model.adicionar_ou_atualizar_prontuario(cpf, dados_prontuario):
-            if self.consulta_model.atualizar_status_consulta_por_cpf(cpf, "Atendido"):
+            if self.consulta_model.atualizar_status_consulta(consulta_id, "Atendido"):
                 messagebox.showinfo("Sucesso", "Prontuário salvo com sucesso! Paciente atendido.")
             else:
                 messagebox.showwarning("Atenção", "Prontuário salvo, mas não foi possível atualizar o status da consulta.")

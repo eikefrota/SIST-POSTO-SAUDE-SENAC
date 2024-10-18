@@ -4,11 +4,12 @@ from PIL import Image
 import os
 
 class TelaProntuario:
-    def __init__(self, janela, controller, paciente, prontuario=None):
+    def __init__(self, janela, controller, paciente, prontuario, consulta_id):
         self.janela = janela
         self.controller = controller
         self.paciente = paciente
         self.prontuario = prontuario
+        self.consulta_id = consulta_id
         self.frame = None
         self.logo_path = os.path.abspath("mvc/imagens/logo.png")
         self.logo_image = self.carregar_imagem(self.logo_path, (150, 150))
@@ -47,27 +48,27 @@ class TelaProntuario:
 
         # Histórico
         ctk.CTkLabel(self.frame, text="Histórico Médico:", font=("Arial", 16, "bold")).grid(row=1, column=0, sticky="w", padx=20, pady=(10, 5))
-        self.historico = ctk.CTkTextbox(self.frame, height=100)
-        self.historico.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="nsew")
-        self.historico.insert("1.0", self.prontuario.historico if self.prontuario else "")
+        self.text_historico = ctk.CTkTextbox(self.frame, height=100)
+        self.text_historico.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.text_historico.insert("1.0", self.prontuario.historico if self.prontuario else "")
 
         # Medicações
         ctk.CTkLabel(self.frame, text="Medicações:", font=("Arial", 16, "bold")).grid(row=3, column=0, sticky="w", padx=20, pady=(10, 5))
-        self.medicacoes = ctk.CTkTextbox(self.frame, height=100)
-        self.medicacoes.grid(row=4, column=0, padx=20, pady=(0, 20), sticky="nsew")
-        self.medicacoes.insert("1.0", self.prontuario.medicacoes if self.prontuario else "")
+        self.text_medicacoes = ctk.CTkTextbox(self.frame, height=100)
+        self.text_medicacoes.grid(row=4, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.text_medicacoes.insert("1.0", self.prontuario.medicacoes if self.prontuario else "")
 
         # Alergias
         ctk.CTkLabel(self.frame, text="Alergias:", font=("Arial", 16, "bold")).grid(row=5, column=0, sticky="w", padx=20, pady=(10, 5))
-        self.alergias = ctk.CTkTextbox(self.frame, height=100)
-        self.alergias.grid(row=6, column=0, padx=20, pady=(0, 20), sticky="nsew")
-        self.alergias.insert("1.0", self.prontuario.alergias if self.prontuario else "")
+        self.text_alergias = ctk.CTkTextbox(self.frame, height=100)
+        self.text_alergias.grid(row=6, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.text_alergias.insert("1.0", self.prontuario.alergias if self.prontuario else "")
 
         # Observações
         ctk.CTkLabel(self.frame, text="Observações:", font=("Arial", 16, "bold")).grid(row=7, column=0, sticky="w", padx=20, pady=(10, 5))
-        self.observacoes = ctk.CTkTextbox(self.frame, height=100)
-        self.observacoes.grid(row=8, column=0, padx=20, pady=(0, 20), sticky="nsew")
-        self.observacoes.insert("1.0", self.prontuario.observacoes if self.prontuario else "")
+        self.text_observacoes = ctk.CTkTextbox(self.frame, height=100)
+        self.text_observacoes.grid(row=8, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.text_observacoes.insert("1.0", self.prontuario.observacoes if self.prontuario else "")
 
         # Frame para os botões
         button_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
@@ -83,12 +84,12 @@ class TelaProntuario:
 
     def salvar_prontuario(self):
         dados_prontuario = {
-            "historico": self.historico.get("1.0", "end-1c"),
-            "medicacoes": self.medicacoes.get("1.0", "end-1c"),
-            "alergias": self.alergias.get("1.0", "end-1c"),
-            "observacoes": self.observacoes.get("1.0", "end-1c")
+            'historico': self.text_historico.get("1.0", "end-1c"),
+            'medicacoes': self.text_medicacoes.get("1.0", "end-1c"),
+            'alergias': self.text_alergias.get("1.0", "end-1c"),
+            'observacoes': self.text_observacoes.get("1.0", "end-1c")
         }
-        self.controller.salvar_prontuario(self.paciente.cpf, dados_prontuario)
+        self.controller.salvar_prontuario(self.paciente.cpf, dados_prontuario, self.consulta_id)
 
     def voltar(self):
         self.frame.destroy()
